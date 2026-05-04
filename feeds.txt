@@ -1,0 +1,8 @@
+https://feeds.bbci.co.uk/news/world/rss.xml
+https://www.theguardian.com/world/rss
+https://rss.nytimes.com/services/xml/rss/nyt/World.xml
+https://agenciabrasil.ebc.com.br/rss/ultimasnoticias/feed.xml
+https://feeds.folha.uol.com.br/emcimadahora/rss091.xml
+https://www.cnnbrasil.com.br/feed/
+https://www.intercept.com.br/feed/
+https://apublica.org/feed/
