@@ -35,6 +35,15 @@
         <section class="filters">
             <div class="toolbar">
                 <form method="get" action="/" class="filter-form">
+                    <label for="q">Search</label>
+                    <input
+                        type="text"
+                        name="q"
+                        id="q"
+                        value="{{ search_query or '' }}"
+                        placeholder="Search articles..."
+                    >
+
                     <label for="category">Category</label>
                     <select name="category" id="category">
                         <option value="">All categories</option>

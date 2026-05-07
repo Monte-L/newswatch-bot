@@ -119,6 +119,19 @@ body {
     padding: 8px 10px;
 }
 
+.filters input {
+    background: #111827;
+    color: #e5e7eb;
+    border: 1px solid #374151;
+    border-radius: 8px;
+    padding: 8px 10px;
+    min-width: 220px;
+}
+
+.filters input::placeholder {
+    color: #6b7280;
+}
+
 .filters button,
 .clear-link {
     background: #e5e7eb;

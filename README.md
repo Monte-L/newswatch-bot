@@ -1,8 +1,8 @@
 # NewsWatch Bot
 
-NewsWatch Bot is a Linux-based Python project designed to collect, store, classify, and organize news from RSS feeds.
+NewsWatch Bot is a Linux-based Python project designed to collect, store, classify, search, and organize news from RSS feeds.
 
-The project started as a command-line RSS collector and is gradually evolving into a local news aggregation system with structured data, logging, categorization, a FastAPI + HTML dashboard, and future support for search, scheduled collection, JavaScript interactions, AI summaries, and production deployment.
+The project started as a command-line RSS collector and is gradually evolving into a local news aggregation system with structured data, logging, categorization, a FastAPI + HTML dashboard, manual reload, article preview pages, keyword search, and future support for JavaScript interactions, scheduled collection, AI summaries, and production deployment.
 
 ---
 
@@ -22,7 +22,7 @@ The goal of this project is to build a local automated news aggregation system u
 - Future AI-assisted summaries
 - Future production deployment with PostgreSQL
 
-The final objective is to centralize relevant news from multiple sources into a single local database, allowing articles to be filtered, categorized, reviewed, refreshed, and eventually summarized from a local web interface.
+The final objective is to centralize relevant news from multiple sources into a single local database, allowing articles to be filtered, searched, categorized, reviewed, refreshed, and eventually summarized from a local web interface.
 
 ---
 
@@ -31,7 +31,7 @@ The final objective is to centralize relevant news from multiple sources into a 
 Current completed phase:
 
 ```text
-Phase 6B — FastAPI Dashboard with Manual Reload Button
+Phase 6D — Search by Keyword
 ```
 
 The dashboard is currently working with:
@@ -39,15 +39,17 @@ The dashboard is currently working with:
 - Article listing
 - Category filters
 - Source filters
+- Keyword search
 - Manual reload button
 - Reload completion message
+- Local article preview pages
 - SQLite integration
-- Article cards with source, category, summary, image, and original link
+- Article cards with source, category, summary, image, preview link, and original link
 
 Next planned phase:
 
 ```text
-Phase 6C — Article Detail Page / Local Preview Page
+Phase 6E — JavaScript Improvements
 ```
 
 ---
@@ -68,17 +70,19 @@ Phase 6C — Article Detail Page / Local Preview Page
 - Display articles in a FastAPI + HTML dashboard
 - Filter articles by category
 - Filter articles by source
+- Search articles by keyword
 - Show only recently collected articles in the dashboard
 - Manually reload news from the dashboard
+- Open local article preview pages
+- Open original source articles
 
 ---
 
 ## Planned Features
 
-- Article detail / local preview page
-- Search by keyword
 - JavaScript-based reload without full page refresh
-- JavaScript-based dynamic filtering
+- JavaScript-based dynamic messages
+- JavaScript-based loading state
 - Automatic scheduled collection every 5 minutes
 - Improved category classification
 - Better image extraction
@@ -154,33 +158,6 @@ newswatch-bot/
 ├── static/
 │   └── style.css
 ├── templates/
-│   └── index.html
-├── news_bot.py
-├── news.db
-├── README.md
-└── requirements.txt
-```
-
-Future structure after the article detail page:
-
-```text
-newswatch-bot/
-├── app/
-│   ├── __init__.py
-│   ├── classifier.py
-│   ├── collector.py
-│   ├── config.py
-│   ├── database.py
-│   ├── logging_config.py
-│   ├── metadata.py
-│   ├── queries.py
-│   └── web.py
-├── feeds.txt
-├── logs/
-│   └── newswatch.log
-├── static/
-│   └── style.css
-├── templates/
 │   ├── index.html
 │   └── article_detail.html
 ├── news_bot.py
@@ -201,11 +178,12 @@ newswatch-bot/
 | `app/classifier.py` | Classifies articles using rule-based keyword matching |
 | `app/metadata.py` | Extracts summaries, cleans HTML, limits text length, and extracts image URLs |
 | `app/collector.py` | Loads RSS feeds, parses articles, extracts metadata, classifies articles, and saves them |
-| `app/queries.py` | Reads articles, categories, sources, and dashboard metrics from SQLite |
+| `app/queries.py` | Reads articles, categories, sources, article details, and dashboard metrics from SQLite |
 | `app/web.py` | Defines the FastAPI application and web routes |
 | `news_bot.py` | Main command-line entry point used to run the collector |
 | `templates/index.html` | Main dashboard HTML template |
-| `static/style.css` | Dashboard styling |
+| `templates/article_detail.html` | Local article preview page template |
+| `static/style.css` | Dashboard and article page styling |
 
 ---
 
@@ -310,11 +288,13 @@ The dashboard displays:
 - Total sources
 - Total categories
 - Article cards
+- Search field
 - Category filter
 - Source filter
 - Manual reload button
 - Reload completion message
-- Article source links
+- Article preview links
+- Original source links
 
 ---
 
@@ -331,6 +311,65 @@ POST /reload
 ```
 
 After the reload finishes, the dashboard displays how many new articles were saved.
+
+---
+
+## Search
+
+The dashboard includes a keyword search field.
+
+The search checks the following article fields:
+
+- Title
+- Summary
+- Source
+- Category
+
+Search can be combined with category and source filters.
+
+Example:
+
+```text
+/?q=economy
+```
+
+Example with category filter:
+
+```text
+/?q=brazil&category=International
+```
+
+Example with source filter:
+
+```text
+/?q=technology&source=BBC News
+```
+
+---
+
+## Article Detail Page
+
+The dashboard includes a local article preview page.
+
+Route:
+
+```text
+GET /articles/{article_id}
+```
+
+The preview page displays:
+
+- Article title
+- Source
+- Category
+- Published date
+- Image when available
+- RSS summary when available
+- Original article link
+
+This page uses metadata stored in SQLite and does not copy the full article content from the original source.
+
+Future AI summaries may be added to this page.
 
 ---
 
@@ -499,6 +538,7 @@ Not every RSS feed provides images. If no image is available, the `image_url` fi
 
 The dashboard supports filtering by:
 
+- Keyword search
 - Category
 - Source
 
@@ -507,30 +547,6 @@ The dashboard currently shows only recently collected articles.
 The current implementation filters articles using the `fetched_at` field, which represents when the bot collected the article.
 
 This is more stable than filtering by the RSS `published` field because RSS feeds may provide publication dates in different formats.
-
----
-
-## Article Detail Page
-
-Planned route:
-
-```text
-GET /articles/{article_id}
-```
-
-The future local article preview page will display:
-
-- Article title
-- Source
-- Category
-- Published date
-- Image when available
-- RSS summary when available
-- Original article link
-
-This page will use metadata stored in SQLite and will not copy the full article content from the original source.
-
-Future AI summaries may be added to this page.
 
 ---
 
@@ -662,6 +678,17 @@ SELECT title, image_url
 FROM articles
 WHERE image_url IS NOT NULL
 AND image_url != ''
+LIMIT 10;
+```
+
+Search articles manually in SQLite:
+
+```sql
+SELECT title, source, category
+FROM articles
+WHERE title LIKE '%economy%'
+OR summary LIKE '%economy%'
+ORDER BY fetched_at DESC
 LIMIT 10;
 ```
 
@@ -840,8 +867,6 @@ Completed
 
 ### Phase 6C — Article Detail Page
 
-Planned features:
-
 - Add local article preview page
 - Route: `/articles/{article_id}`
 - Show title, source, category, image, summary, and original link
@@ -850,23 +875,21 @@ Planned features:
 Status:
 
 ```text
-Next phase
+Completed
 ```
 
 ---
 
 ### Phase 6D — Search
 
-Planned features:
-
 - Search articles by keyword
-- Search title and summary
+- Search title, summary, source, and category
 - Combine search with category and source filters
 
 Status:
 
 ```text
-Planned
+Completed
 ```
 
 ---
@@ -883,7 +906,7 @@ Planned features:
 Status:
 
 ```text
-Planned
+Next phase
 ```
 
 ---
@@ -1005,4 +1028,4 @@ This project is intended for:
 - Infrastructure portfolio development
 - Future deployment practice
 
-NewsWatch Bot is not just a script. It is being developed as a small local news aggregation system that demonstrates automation, data persistence, modular design, dashboard development, and future web application deployment.
+NewsWatch Bot is not just a script. It is being developed as a small local news aggregation system that demonstrates automation, data persistence, modular design, dashboard development, search functionality, and future web application deployment.

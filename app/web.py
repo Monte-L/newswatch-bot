@@ -29,6 +29,7 @@ def dashboard(
     request: Request,
     category: Optional[str] = None,
     source: Optional[str] = None,
+    q: Optional[str] = None,
     reloaded: Optional[str] = None,
     new_articles: Optional[int] = None,
 ):
@@ -41,6 +42,7 @@ def dashboard(
         limit=50,
         category=category,
         source=source,
+        search=q,
     )
 
     categories = get_categories()
@@ -57,6 +59,7 @@ def dashboard(
             "counts": counts,
             "selected_category": category,
             "selected_source": source,
+            "search_query": q,
             "reloaded": reloaded,
             "new_articles": new_articles,
         },
@@ -85,6 +88,7 @@ def article_detail(request: Request, article_id: str):
 def reload_news(
     category: Optional[str] = None,
     source: Optional[str] = None,
+    q: Optional[str] = None,
 ):
     """
     Manually reload news from the dashboard.
@@ -102,7 +106,10 @@ def reload_news(
     
     if source:
         params["source"] = source
-    
+
+    if q:
+        params["q"] = q
+        
     redirect_url = "/?" + urlencode(params)
 
     return RedirectResponse(url=redirect_url, status_code=303)

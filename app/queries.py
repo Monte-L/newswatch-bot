@@ -15,6 +15,7 @@ def get_recent_articles(
         limit: int = 50,
         category: Optional[str] = None,
         source: Optional[str] = None,
+        search: Optional[str] = None,
 ):
     """
     Return recent articles from the database.
@@ -51,6 +52,24 @@ def get_recent_articles(
     if source:
         query += " AND source = ?"
         params.append(source)
+
+    if search:
+        query += """
+            AND (
+                title LIKE ?
+                OR summary LIKE ?
+                OR source LIKE ?
+                OR category LIKE ?
+            )
+        """
+
+        search_pattern = f"%{search}%"
+        params.extend([
+            search_pattern,
+            search_pattern,
+            search_pattern,
+            search_pattern,
+        ])
     
     query += """ 
         ORDER BY published DESC 
