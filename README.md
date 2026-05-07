@@ -654,4 +654,17 @@ This project is intended for:
 - Infrastructure portfolio development
 - Future FastAPI dashboard development
 
-NewsWatch Bot is not just a script. It is being developed as a small local news aggregation system that demonstrates automation, data persistence, modular design, and future web application integration.
+NewsWatch Bot is not just a script. It is being developed as a small local news aggregation system that demonstrates automation, data persistence, modular design, and future web application integration. 
+
+## Manual Reload from Dashboard
+
+The dashboard includes a manual reload button.
+
+When clicked, the FastAPI backend calls the RSS collector, fetches new articles, saves them to SQLite, and redirects back to the dashboard.
+
+Route:
+
+```text
+POST /reload
+After the reload finishes, the dashboard displays how many new articles were saved.
+```
