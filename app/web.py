@@ -2,7 +2,7 @@ from typing import Optional
 from urllib.parse import urlencode
 
 from fastapi import FastAPI, Request, HTTPException
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
@@ -84,6 +84,22 @@ def article_detail(request: Request, article_id: str):
         },
     )
 
+@app.post("/api/reload")
+def api_reload_news():
+    """
+    Reload news and return a JSON response.
+    """
+
+    create_database()
+    total_new_articles = process_feeds()
+
+    return JSONResponse(
+        {
+            "status" : "sucess",
+            "new_articles" : total_new_articles,
+        }
+    )
+
 @app.post("/reload")
 def reload_news(
     category: Optional[str] = None,
@@ -109,7 +125,7 @@ def reload_news(
 
     if q:
         params["q"] = q
-        
+
     redirect_url = "/?" + urlencode(params)
 
     return RedirectResponse(url=redirect_url, status_code=303)
