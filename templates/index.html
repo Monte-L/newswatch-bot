@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>NewsWatch Bot</title>
+    <link rel="stylesheet" href="/static/style.css"
+</head>
+<body>
+    <header class="topbar">
+        <div>
+            <h1>NewsWatch Bot</h1>
+            <p>Local RSS news aggregaton dashboard</p>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="metrics">
+            <div class="metric-card">
+                <span class="metric-label">Articles</span>
+                <strong>{{ counts.total_articles }}</strong>
+            </div>
+
+            <div class="metric-card">
+                <span class="metric-label">Sources</span>
+                <strong>{{ counts.total_sources }}</strong>
+            </div>
+
+            <div class="metric-card">
+                <span class="metric-label">Categories</span>
+                <strong>{{ counts.total_categories }}</strong>
+            </div>
+        </section>
+
+        <section class="filters">
+            <form method="get" action="/">
+                <label for="category">Category</label>
+                <select name="category" id="category">
+                    <option value="">All categories</option>
+                    {% for category in categories %}
+                        <option value="{{ category }}" {% if selected_category == category %}selected{% endif %}>{{ category }}
+                            {{ category }}
+                        </option>
+                    {% endfor %}
+                </select>
+
+                <label for="source">Source</label>
+                <select name="source" id="source">
+                    <option value="">All sources</option>
+                    {% for source in sources %}
+                        <option value="{{ source }}" {% if selected_source == source %}selected{% endif %}>{{ source }}
+                            {{ source }}
+                        </option>
+                    {% endfor %}
+                </select>
+
+                <button type="submit">Apply filters</button>
+                <a class="clear-link" href="/">Clear</a>
+            </form>
+        </section>
+
+        <section class="articles">
+            {% if articles %}
+                {% for article in articles %}
+                    <article class="article-card">
+                        {% if article.image_url %}
+                            <img class="article-image" src="{{ article.image_url }}" alt="Article image">
+                        {% endif %}
+
+                        <div class="article-content">
+                            <div class="article-meta">
+                                <span>{{ article.source }}</span>
+                                <span>{{ article.category }}</span>
+                            </div>
+
+                            <h2>{{ article.title }}</h2>
+
+                            {% if article.summary %}
+                                <p>{{ article.summary }}</p>
+                            {% else %}
+                                <p class="muted">No summary available from RSS feed.</p>
+                            {% endif %}
+
+                            <div class="article-footer">
+                                <span>{{ article.published }}</span>
+                                <a href="{{ article.link }}" target="_blank" rel="noopener noreferrer">Open original</a>
+                            </div>
+                        </div>
+                    </article>
+                {% endfor %}
+            {% else %}
+                <p class="empty-state">No articles found for the selected filters.</p>
+            {% endif %}
+        </section>
+    </main>
+</body>
+</html>
