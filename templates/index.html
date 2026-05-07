@@ -33,31 +33,41 @@
         </section>
 
         <section class="filters">
-            <form method="get" action="/">
-                <label for="category">Category</label>
-                <select name="category" id="category">
-                    <option value="">All categories</option>
-                    {% for category in categories %}
-                        <option value="{{ category }}" {% if selected_category == category %}selected{% endif %}>{{ category }}
-                            {{ category }}
-                        </option>
-                    {% endfor %}
-                </select>
+            <div class="toolbar">
+                <form method="get" action="/" class="filter-form">
+                    <label for="category">Category</label>
+                    <select name="category" id="category">
+                        <option value="">All categories</option>
+                        {% for category in categories %}
+                            <option value="{{ category }}" {% if selected_category == category %}selected{% endif %}>
+                                {{ category }}
+                            </option>
+                        {% endfor %}
+                    </select>
 
-                <label for="source">Source</label>
-                <select name="source" id="source">
-                    <option value="">All sources</option>
-                    {% for source in sources %}
-                        <option value="{{ source }}" {% if selected_source == source %}selected{% endif %}>{{ source }}
-                            {{ source }}
-                        </option>
-                    {% endfor %}
-                </select>
+                    <label for="source">Source</label>
+                    <select name="source" id="source">
+                        <option value="">All sources</option>
+                        {% for source in sources %}
+                            <option value="{{ source }}" {% if selected_source == source %}selected{% endif %}>
+                                {{ source }}
+                            </option>
+                        {% endfor %}
+                    </select>
 
-                <button type="submit">Apply filters</button>
-                <a class="clear-link" href="/">Clear</a>
-            </form>
+                    <button type="submit">Apply filters</button>
+                    <a class="clear-link" href="/">Clear</a>
+                </form>
+
+                <form method="post" action="/reload" class="reload-form">
+                    <button type="submit" class="reload-button">Reload news</button>
+                </form>
+            </div>
         </section>
+
+        {% if reloaaded %}
+            <div class="reload-message">Reload completed. News articles saved: {{ new_articles }}</div>
+        {% endif %}
 
         <section class="articles">
             {% if articles %}

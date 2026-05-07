@@ -64,11 +64,46 @@ body {
     margin-bottom: 24px;
 }
 
+.toolbar {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+
 .filters form {
     display: flex;
     gap: 12px;
     align-items: center;
     flex-wrap: wrap;
+}
+
+.reload-form {
+    margin: 0;
+}
+
+.reload-button {
+    background: #93c5fd;
+    color: #111827;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 14px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.reload-button:hover {
+    opacity: 0.9;
+}
+
+.reload-message {
+    background: #064e3b;
+    border: 1px solid #10b981;
+    color: #d1fae5;
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-bottom: 24px;
 }
 
 .filters label {

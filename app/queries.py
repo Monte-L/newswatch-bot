@@ -39,7 +39,7 @@ def get_recent_articles(
             published,
             fetched_at
         FROM articles
-        WHERE 1=1
+        WHERE fetched_at >= datetime('now', '-3 days')
     """
 
     params = []
@@ -107,13 +107,13 @@ def get_sources():
 
 def get_article_counts():
     """
-    Return basic dashboard metrics.
+    Return basic dashboard metrics for articles collected in the last 3 days.
     """
 
     connection = get_connection()
     cursor = connection.cursor()
 
-    cursor.execute("SELECT COUNT(*) count FROM articles")
+    cursor.execute("SELECT COUNT(*) count FROM articles WHERE fetched_at >= datetime('now', '-3 days')")
     total_articles = cursor.fetchone()[0]
 
     cursor.execute("""
@@ -121,6 +121,7 @@ def get_article_counts():
         FROM articles
         WHERE source IS NOT NULL
         AND source != ''
+        AND fetched_at >= datetime('now', '-3 days')
     """)
     total_sources = cursor.fetchone()[0]
 
@@ -129,6 +130,7 @@ def get_article_counts():
         FROM articles
         WHERE category IS NOT NULL
         AND category != ''
+        AND fetched_at >= datetime('now', '-3 days')
     """)
     total_categories = cursor.fetchone()[0]
 
