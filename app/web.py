@@ -1,7 +1,7 @@
 from typing import Optional
 from urllib.parse import urlencode
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -9,6 +9,7 @@ from fastapi.templating import Jinja2Templates
 from app.collector import process_feeds
 from app.database import create_database
 from app.queries import (
+    get_article_by_id,
     get_article_counts,
     get_categories,
     get_recent_articles,
@@ -58,6 +59,25 @@ def dashboard(
             "selected_source": source,
             "reloaded": reloaded,
             "new_articles": new_articles,
+        },
+    )
+
+@app.get("/articles/{article_id}", response_class=HTMLResponse)
+def article_detail(request: Request, article_id: str):
+    """
+    Render a local article preview page.
+    """
+
+    article = get_article_by_id(article_id)
+
+    if article is None:
+        raise HTTPException(status_code=404, detail="Artile not found")
+    
+    return templates.TemplateResponse(
+        request=request,
+        name="article_detail.html",
+        context={
+            "article": article,
         },
     )
 

@@ -140,3 +140,35 @@ def get_article_counts():
         "total_sources": total_sources,
         "total_categories": total_categories,
     }
+
+def get_article_by_id(article_id: str):
+    """
+    Return a single article by its ID.
+    """
+
+    connection = get_connection()
+    cursor = connection.cursor()
+
+    cursor.execute("""
+        SELECT
+            id,
+            title,
+            link,
+            source,
+            category,
+            summary,
+            image_url,
+            published,
+            fetched_at
+        FROM articles
+        WHERE id = ?
+    """, (article_id,))
+
+    article = cursor.fetchone()
+
+    connection.close()
+
+    if article is None:
+        return None
+    
+    return dict(article)

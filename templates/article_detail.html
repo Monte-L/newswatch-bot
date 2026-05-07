@@ -1,0 +1,62 @@
+<!DOCTYPE html>>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ article.title}} | NewsWatch Bot</title>
+    <link rel="stylesheet" href="/static/style.css"
+</head>
+<body>
+    <header class="topbar">
+        <div>
+            <h1>NewsWatch Bot</h1>
+            <p>Local article preview</p>
+        </div>
+    </header>
+
+    <main class="container">
+        <a href="/" class="back-link">← Back to dashboard</a>
+
+        <article class="detail-card">
+            {% if article.image_url %}
+                <img class="detail-image" src="{{ article.image_url }}" alt="">
+            {% endif %}
+
+            <div class="detail-content">
+                <div class="article-meta">
+                    <span>{{ article.source }}</span>
+                    <span>{{ article.category }}</span>
+                    <span>{{ article.published }}</span>
+                </div>
+
+                <h2>{{ article.title }}</h2>
+
+                {% if article.summary %}
+                    <section class="detail-section">
+                        <h3>RSS Summary</h3>
+                        <p>{{ article.summary }}</p>
+                    </section>
+                {% else %}
+                    <section class="detail-section">
+                        <h3>RSS Summary</h3>
+                        <p class="muted">No summary available from RSS feed.</p>
+                    </section>
+                {% endif %}
+
+                <section class="detail-section">
+                    <h3>Source</h3>
+                    <p>
+                        This preview uses metadata collected from the RSS feed.
+                        For the full article, open the original source.
+                    </p>
+                </section>
+
+                <div class="detail-actions">
+                    <a href="{{ article.link }}" target="_blank" rel="noopener noreferrer">
+                        Open original article
+                    </a>
+                </div>
+            </div>
+        </article>
+    </main>
+</body>
+</html>

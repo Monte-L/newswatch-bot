@@ -93,7 +93,16 @@
 
                             <div class="article-footer">
                                 <span>{{ article.published }}</span>
-                                <a href="{{ article.link }}" target="_blank" rel="noopener noreferrer">Open original</a>
+
+                                <div class="article-actions">
+                                    <a href="/articles/{{ article.id }}">
+                                        Read preview
+                                    </a>
+
+                                    <a href="{{ article.link }}" target="_blank" rel="noopener noreferrer">
+                                        Open original
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </article>
