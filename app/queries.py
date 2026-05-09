@@ -169,7 +169,37 @@ def get_article_counts():
         "total_sources": total_sources,
         "total_categories": total_categories,
     }
-
+    
+def get_latest_collector_run():
+    """
+    Return the latest collector execution record.
+    """
+    
+    connection = get_connection()
+    cursor = connection.cursor()
+    
+    cursor.execute("""
+        SELECT
+            id,
+            started_at,
+            finished_at,
+            status,
+            new_articles,
+            duration_seconds,
+            error_message
+        FROM collector_runs
+        ORDER BY id DESC
+        LIMIT 1    
+    """)
+    
+    collector_run = cursor.fetchone()
+    
+    connection.close()               
+    
+    if collector_run is None:
+        return None
+    
+    return dict(collector_run)
 
 def get_article_by_id(article_id: str):
     """

@@ -1,3 +1,5 @@
+import logging
+
 from typing import Optional
 from urllib.parse import urlencode
 
@@ -8,7 +10,7 @@ from fastapi.templating import Jinja2Templates
 
 from app.runtime_lock import collector_lock
 from app.collector import process_feeds
-from app.database import create_database
+from app.database import create_database, finish_collector_run, start_collector_run
 from app.queries import (
     get_article_by_id,
     get_article_counts,
@@ -89,13 +91,23 @@ def article_detail(request: Request, article_id: str):
 @app.post("/api/reload")
 def api_reload_news():
     """
-    Reload news and return a JSON response.
+    Reload news from the dashboard and return a JSON response.
+    Also records the collector execution status.
     """
 
     create_database()
-    
+
     with collector_lock() as lock_acquired:
         if not lock_acquired:
+            run_id = start_collector_run()
+
+            finish_collector_run(
+                run_id,
+                status="skipped",
+                new_articles=0,
+                error_message="Collector is already running.",
+            )
+
             return JSONResponse(
                 {
                     "status": "busy",
@@ -103,15 +115,42 @@ def api_reload_news():
                     "new_articles": 0,
                 }
             )
-            
-    total_new_articles = process_feeds()
 
-    return JSONResponse(
-        {
-            "status": "success",
-            "new_articles": total_new_articles,
-        }
-    )
+        run_id = start_collector_run()
+
+        try:
+            total_new_articles = process_feeds()
+
+            finish_collector_run(
+                run_id,
+                status="success",
+                new_articles=total_new_articles,
+            )
+
+            return JSONResponse(
+                {
+                    "status": "success",
+                    "new_articles": total_new_articles,
+                }
+            )
+        except Exception as error:
+            finish_collector_run(
+                run_id,
+                status="failed",
+                new_articles=0,
+                error_message=str(error),
+            )
+
+            logging.exception("Reload API failed.")
+
+            return JSONResponse(
+                {
+                    "status": "failed",
+                    "message": "Reload failed",
+                    "new_articles": 0,
+                },
+                status_code=500,
+            )
 
 
 @app.post("/reload")
@@ -121,20 +160,51 @@ def reload_news(
     q: Optional[str] = None,
 ):
     """
-    Manually reload news from the dashboard.
+    Manually reload news from the dashboard using the traditional form fallback.
+    Also records the collector execution status.
     """
     create_database()  # Ensure database is initialized
-    
+
     with collector_lock() as lock_acquired:
-        if lock_acquired:
-            total_new_articles = process_feeds()
-            reload_status = "1"
-        else:
+        if not lock_acquired:
+            run_id = start_collector_run()
+
+            finish_collector_run(
+                run_id,
+                status="skipped",
+                new_articles=0,
+                error_message="Collector is already running.",
+            )
+
             total_new_articles = 0
             reload_status = "busy"
+        else:
 
+            run_id = start_collector_run()
+            try:
+                total_new_articles = process_feeds()
+
+                finish_collector_run(
+                    run_id,
+                    status="success",
+                    new_articles=total_new_articles,
+                )
+
+                reload_status = "1"
+            except Exception as error:
+                finish_collector_run(
+                    run_id,
+                    status="failed",
+                    new_articles=0,
+                    error_message=str(error),
+                )
+
+                logging.exception("Traditional reload failed.")
+
+                total_new_articles = 0
+                reload_status = "failed"
     params = {
-        "reloaded": "reload_status",
+        "reloaded": reload_status,
         "new_articles": str(total_new_articles),
     }
 

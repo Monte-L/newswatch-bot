@@ -1,9 +1,11 @@
 from pathlib import Path
 
-DB_FILE = Path("news.db")
-FEEDS_FILE = Path("feeds.txt")
+BASE_DIR = Path(__file__).resolve().parent.parent
 
-LOG_DIR = Path("logs")
+DB_FILE = BASE_DIR / "news.db"
+FEEDS_FILE = BASE_DIR / "feeds.txt"
+
+LOG_DIR = BASE_DIR / "logs"
 LOG_FILE = LOG_DIR / "newswatch.log"
 
-LOCK_FILE = Path("newswatch.lock")
+LOCK_FILE = BASE_DIR / "newswatch.lock"

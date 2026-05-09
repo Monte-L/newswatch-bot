@@ -27,6 +27,19 @@ def create_database():
             fetched_at TEXT NOT NULL
             )
         """)
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS collector_runs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            started_at TEXT NOT NULL,
+            finished_at TEXT,
+            status TEXT NOT NULL,
+            new_articles INTEGER DEFAULT 0,
+            duration_seconds REAL,
+            error_message TEXT
+            )
+        """)
+    
     migrate_database(cursor)
 
     connection.commit()
@@ -63,6 +76,90 @@ def migrate_database(cursor):
         WHERE category IS NULL OR category = ''
     """)
 
+def start_collector_run():
+    """
+    Register the beginning of a collector execution.
+    """
+    started_at = datetime.now(timezone.utc).isoformat()
+    
+    connection = sqlite3.connect(DB_FILE)
+    cursor = connection.cursor()
+    
+    cursor.execute(
+        """
+        INSERT INTO collector_runs (
+            started_at,
+            status
+        )
+        VALUES (?, ?)
+        """,
+        (started_at, "running"),
+    )
+    
+    connection.commit()
+    run_id = cursor.lastrowid
+    connection.close()
+    
+    logging.info(f"Collector run registered: id={run_id}, status=running.")
+    return run_id
+
+def finish_collector_run(run_id, status, new_articles=0, error_message=None):
+    """
+    Update a collector execution with its final status.
+    """
+    
+    finished_at = datetime.now(timezone.utc)
+    finished_at_text = finished_at.isoformat()
+    
+    connection = sqlite3.connect(DB_FILE)
+    cursor = connection.cursor()
+    
+    cursor.execute(
+        """
+        SELECT started_at
+        FROM collector_runs
+        WHERE id = ?
+        """,
+        (run_id,),
+    )
+    
+    row = cursor.fetchone()
+    
+    if row:
+        started_at = datetime.fromisoformat(row[0])
+        duration_seconds = (finished_at - started_at).total_seconds()
+    else:
+        duration_seconds = None
+        
+    cursor.execute(
+        """
+        UPDATE collector_runs
+        SET
+            finished_at = ?,
+            status = ?,
+            new_articles = ?,
+            duration_seconds = ?,
+            error_message = ?
+        WHERE id = ?
+        """,
+        (
+            finished_at_text,
+            status,
+            new_articles,
+            duration_seconds,
+            error_message,
+            run_id,
+        ),
+    )
+    
+    connection.commit()
+    connection.close()
+    
+    logging.info(
+        f"Collector run finished: id={run_id},"
+        f"status={status}, new_articles={new_articles},"
+    )
+    
 
 def generate_article_id(link):
     """
