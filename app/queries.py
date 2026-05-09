@@ -77,7 +77,7 @@ def get_recent_articles(
         )
 
     query += """ 
-        ORDER BY published DESC 
+        ORDER BY fetched_at DESC 
         LIMIT ?
     """
     params.append(limit)

@@ -49,6 +49,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 reloadMessage.textContent = `Reload completed. New articles saved: ${data.new_articles}`;
                 reloadMessage.hidden = false;
             }
+
+            setTimeout(() =>{
+                window.location.reload();
+            }, 1500);
+            
         } catch (error) {
             console.error("Reload failed: ", error);
 
