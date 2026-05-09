@@ -2,7 +2,7 @@
 
 NewsWatch Bot is a Linux-based Python project designed to collect, store, classify, search, and organize news from RSS feeds.
 
-The project started as a command-line RSS collector and is gradually evolving into a local news aggregation system with structured data, logging, categorization, a FastAPI + HTML dashboard, manual reload, article preview pages, keyword search, and future support for JavaScript interactions, scheduled collection, AI summaries, and production deployment.
+The project started as a command-line RSS collector and is gradually evolving into a local news aggregation system with structured data, logging, categorization, a FastAPI + HTML dashboard, manual reload, article preview pages, keyword search, JavaScript-based reload feedback, and future support for scheduled collection, AI summaries, automation, and production deployment.
 
 ---
 
@@ -18,11 +18,13 @@ The goal of this project is to build a local automated news aggregation system u
 - Modular Python structure
 - FastAPI
 - HTML/CSS
-- Future JavaScript improvements
+- JavaScript
+- Future scheduled collection
 - Future AI-assisted summaries
+- Future automation and notifications
 - Future production deployment with PostgreSQL
 
-The final objective is to centralize relevant news from multiple sources into a single local database, allowing articles to be filtered, searched, categorized, reviewed, refreshed, and eventually summarized from a local web interface.
+The final objective is to centralize relevant news from multiple sources into a single local database, allowing articles to be collected, filtered, searched, categorized, reviewed, refreshed, and eventually summarized from a local web interface.
 
 ---
 
@@ -31,7 +33,7 @@ The final objective is to centralize relevant news from multiple sources into a 
 Current completed phase:
 
 ```text
-Phase 6D — Search by Keyword
+Phase 6E-6 — JavaScript reload feedback and loading state
 ```
 
 The dashboard is currently working with:
@@ -41,15 +43,20 @@ The dashboard is currently working with:
 - Source filters
 - Keyword search
 - Manual reload button
-- Reload completion message
+- JavaScript-based reload using `fetch()`
+- API route `POST /api/reload` returning JSON
+- Loading state on the reload button
+- Dynamic reload completion message
+- Automatic dashboard refresh after reload
 - Local article preview pages
 - SQLite integration
 - Article cards with source, category, summary, image, preview link, and original link
+- Article ordering based on `fetched_at DESC`
 
 Next planned phase:
 
 ```text
-Phase 6E — JavaScript Improvements
+Phase 7 — Scheduled collection
 ```
 
 ---
@@ -64,6 +71,7 @@ Phase 6E — JavaScript Improvements
 - Generate execution logs
 - Extract article summaries from RSS feeds when available
 - Clean HTML from RSS summaries
+- Limit long RSS summaries for dashboard readability
 - Extract image URLs from RSS media fields when available
 - Classify articles using rule-based keyword matching
 - Organize the code into Python modules
@@ -72,7 +80,15 @@ Phase 6E — JavaScript Improvements
 - Filter articles by source
 - Search articles by keyword
 - Show only recently collected articles in the dashboard
+- Order dashboard articles by `fetched_at DESC`
 - Manually reload news from the dashboard
+- Provide a JSON API route for reloading news
+- Use JavaScript to intercept the reload form submit event
+- Reload news using `fetch()`
+- Show a loading state on the reload button
+- Disable the reload button while collection is running
+- Show dynamic reload success or error messages in the dashboard
+- Automatically refresh the dashboard after a successful reload
 - Open local article preview pages
 - Open original source articles
 
@@ -80,16 +96,24 @@ Phase 6E — JavaScript Improvements
 
 ## Planned Features
 
-- JavaScript-based reload without full page refresh
-- JavaScript-based dynamic messages
-- JavaScript-based loading state
-- Automatic scheduled collection every 5 minutes
+- Automatic scheduled collection every few minutes
+- Track last collector execution time
+- Track last successful collector execution
+- Prevent overlapping collector runs
+- Show scheduler status in the dashboard
+- Improve JavaScript interactions further
+- Add JSON API endpoints for article listing
+- Update article lists dynamically without full page reload
 - Improved category classification
 - Better image extraction
+- RSS published date normalization
+- Dashboard placeholder when no article image is available
 - AI-generated article summaries in a future phase
+- AI-generated key points and article importance notes
 - Telegram, Discord, or email notifications in a future phase
 - Daily reports
 - n8n automation integration in a later phase
+- Google Sheets export
 - Metrics about collected articles, sources, categories, and bot execution status
 - PostgreSQL migration when preparing for production deployment
 - Public deployment with domain, HTTPS, and reverse proxy
@@ -113,7 +137,29 @@ SQLite Database
    ↓
 FastAPI Backend
    ↓
-HTML/CSS Dashboard
+Jinja2 HTML Templates
+   ↓
+HTML/CSS/JavaScript Dashboard
+```
+
+Current reload flow:
+
+```text
+User clicks Reload News
+   ↓
+JavaScript intercepts the form submit event
+   ↓
+event.preventDefault() prevents the traditional page reload
+   ↓
+fetch() sends a POST request to /api/reload
+   ↓
+FastAPI runs the RSS collector
+   ↓
+The API returns a JSON response
+   ↓
+The dashboard shows a loading state and completion message
+   ↓
+The page refreshes automatically to display the updated article list
 ```
 
 Future production-oriented architecture:
@@ -121,7 +167,7 @@ Future production-oriented architecture:
 ```text
 RSS Feeds
    ↓
-Background Collector
+Scheduled Background Collector
    ↓
 PostgreSQL Database
    ↓
@@ -156,6 +202,7 @@ newswatch-bot/
 ├── logs/
 │   └── newswatch.log
 ├── static/
+│   ├── app.js
 │   └── style.css
 ├── templates/
 │   ├── index.html
@@ -165,6 +212,8 @@ newswatch-bot/
 ├── README.md
 └── requirements.txt
 ```
+
+Runtime files such as `news.db` and `logs/newswatch.log` are local development artifacts and should not be committed to GitHub.
 
 ---
 
@@ -179,11 +228,14 @@ newswatch-bot/
 | `app/metadata.py` | Extracts summaries, cleans HTML, limits text length, and extracts image URLs |
 | `app/collector.py` | Loads RSS feeds, parses articles, extracts metadata, classifies articles, and saves them |
 | `app/queries.py` | Reads articles, categories, sources, article details, and dashboard metrics from SQLite |
-| `app/web.py` | Defines the FastAPI application and web routes |
+| `app/web.py` | Defines the FastAPI application, dashboard routes, article routes, reload routes, and API routes |
 | `news_bot.py` | Main command-line entry point used to run the collector |
 | `templates/index.html` | Main dashboard HTML template |
 | `templates/article_detail.html` | Local article preview page template |
 | `static/style.css` | Dashboard and article page styling |
+| `static/app.js` | Handles dashboard JavaScript behavior, reload API calls, loading state, dynamic messages, and automatic dashboard refresh |
+| `feeds.txt` | Stores RSS feed URLs used by the collector |
+| `requirements.txt` | Lists Python dependencies required to run the project |
 
 ---
 
@@ -198,6 +250,17 @@ Main dependencies:
 - `fastapi`
 - `uvicorn`
 - `jinja2`
+
+The project also uses Python standard library modules such as:
+
+- `sqlite3`
+- `hashlib`
+- `logging`
+- `datetime`
+- `pathlib`
+- `typing`
+- `urllib.parse`
+- `re`
 
 ---
 
@@ -255,10 +318,12 @@ The bot will:
 1. Load RSS feeds from `feeds.txt`
 2. Parse the feeds
 3. Extract article metadata
-4. Classify articles
-5. Save new articles to SQLite
-6. Skip duplicate articles
-7. Write execution logs
+4. Clean and limit summaries
+5. Extract image URLs when available
+6. Classify articles
+7. Save new articles to SQLite
+8. Skip duplicate articles
+9. Write execution logs
 
 ---
 
@@ -292,7 +357,8 @@ The dashboard displays:
 - Category filter
 - Source filter
 - Manual reload button
-- Reload completion message
+- JavaScript loading state
+- Dynamic reload completion message
 - Article preview links
 - Original source links
 
@@ -302,15 +368,69 @@ The dashboard displays:
 
 The dashboard includes a manual reload button.
 
-When clicked, the FastAPI backend calls the RSS collector, fetches new articles, saves them to SQLite, and redirects back to the dashboard.
+The current primary reload flow uses JavaScript:
 
-Route:
+```text
+User clicks Reload News
+   ↓
+JavaScript intercepts the form submit event
+   ↓
+event.preventDefault() prevents the traditional page reload
+   ↓
+fetch() sends a POST request to /api/reload
+   ↓
+FastAPI runs the RSS collector
+   ↓
+The API returns a JSON response
+   ↓
+The dashboard shows a loading state and completion message
+   ↓
+The page refreshes automatically to display the updated article list
+```
+
+API route:
+
+```text
+POST /api/reload
+```
+
+Example JSON response:
+
+```json
+{
+  "status": "success",
+  "new_articles": 12
+}
+```
+
+The project also keeps a traditional form fallback route:
 
 ```text
 POST /reload
 ```
 
-After the reload finishes, the dashboard displays how many new articles were saved.
+This route reloads news and redirects back to the dashboard with query parameters showing the reload result.
+
+---
+
+## Testing the Reload API with curl
+
+With the FastAPI server running, the reload API can be tested from the terminal:
+
+```bash
+curl -X POST http://127.0.0.1:8000/api/reload
+```
+
+Expected response example:
+
+```json
+{
+  "status": "success",
+  "new_articles": 0
+}
+```
+
+The number of new articles depends on whether the RSS feeds contain articles that are not already stored in the database.
 
 ---
 
@@ -393,6 +513,35 @@ To add or remove sources, edit `feeds.txt`.
 
 The collector does not need code changes when RSS sources are updated.
 
+Current feeds include a mix of:
+
+- International news
+- Brazilian news
+- Technology
+- Business
+- Environment
+- Science
+- Public or institutional sources
+
+Future improvement:
+
+```text
+Allow comments in feeds.txt so sources can be grouped by category.
+```
+
+Example future format:
+
+```text
+# World news
+https://feeds.bbci.co.uk/news/world/rss.xml
+
+# Brazil
+https://agenciabrasil.ebc.com.br/rss/ultimasnoticias/feed.xml
+
+# Technology
+https://feeds.bbci.co.uk/news/technology/rss.xml
+```
+
 ---
 
 ## Database
@@ -465,6 +614,8 @@ This generated hash is stored as the article `id`.
 
 Because `id` is the primary key, SQLite prevents the same article from being inserted more than once.
 
+If an existing article is found again, the project can still enrich missing metadata such as category, summary, or image URL.
+
 ---
 
 ## Categories
@@ -495,9 +646,19 @@ Example:
 "dollar", "inflation", "central bank" → Economy
 "government", "congress", "president" → Politics
 "police", "crime", "investigation" → Security
+"software", "AI", "chip", "automation" → Technology
 ```
 
 This approach is simple, transparent, and easy to improve later.
+
+Future improvements may include:
+
+- Better keyword sets
+- Multiple languages
+- Full-word matching
+- Weighted keyword scoring
+- Feed-based category defaults
+- NLP or AI-assisted classification
 
 ---
 
@@ -509,6 +670,7 @@ Currently supported metadata:
 
 - Summary
 - Cleaned plain-text summary
+- Limited-length summary
 - Image URL when available
 - Category
 
@@ -532,6 +694,13 @@ summary HTML images
 
 Not every RSS feed provides images. If no image is available, the `image_url` field remains empty.
 
+Future metadata improvements:
+
+- Search for images in `description` as well as `summary`
+- Validate image URLs before returning them
+- Add dashboard placeholder when no article image is available
+- Normalize RSS published dates into a consistent format
+
 ---
 
 ## Dashboard Filtering
@@ -546,7 +715,38 @@ The dashboard currently shows only recently collected articles.
 
 The current implementation filters articles using the `fetched_at` field, which represents when the bot collected the article.
 
-This is more stable than filtering by the RSS `published` field because RSS feeds may provide publication dates in different formats.
+The dashboard orders articles by:
+
+```sql
+ORDER BY fetched_at DESC
+```
+
+This means the most recently collected articles appear first.
+
+This is more stable than ordering by the RSS `published` field because RSS feeds may provide publication dates in different formats.
+
+---
+
+## JavaScript Dashboard Behavior
+
+The project currently uses `static/app.js` to improve the dashboard experience.
+
+Current JavaScript behavior:
+
+- Confirms that JavaScript is loaded in the browser
+- Waits for the DOM to load
+- Finds the reload form using `#reload-form`
+- Captures the form submit event
+- Uses `event.preventDefault()` to stop the traditional form submission
+- Sends a `POST` request to `/api/reload` using `fetch()`
+- Uses `async/await` for asynchronous code
+- Parses the JSON response
+- Changes the reload button text to `Reloading...`
+- Disables the reload button while the collector is running
+- Shows success or error messages in the dashboard
+- Refreshes the page automatically after successful reload
+
+This creates a better user experience while keeping a traditional `/reload` route available as a fallback.
 
 ---
 
@@ -647,7 +847,7 @@ SELECT COUNT(*) FROM articles;
 Show recent articles:
 
 ```sql
-SELECT title, source, category, published
+SELECT title, source, category, published, fetched_at
 FROM articles
 ORDER BY fetched_at DESC
 LIMIT 10;
@@ -692,6 +892,15 @@ ORDER BY fetched_at DESC
 LIMIT 10;
 ```
 
+Check latest collected articles:
+
+```sql
+SELECT title, source, fetched_at
+FROM articles
+ORDER BY fetched_at DESC
+LIMIT 20;
+```
+
 Exit SQLite:
 
 ```sql
@@ -720,6 +929,12 @@ Run the dashboard:
 uvicorn app.web:app --reload
 ```
 
+Test the reload API:
+
+```bash
+curl -X POST http://127.0.0.1:8000/api/reload
+```
+
 Check Python syntax:
 
 ```bash
@@ -736,6 +951,18 @@ Check Git status:
 
 ```bash
 git status
+```
+
+Stage changes:
+
+```bash
+git add .
+```
+
+Commit changes:
+
+```bash
+git commit -m "Describe the change here"
 ```
 
 ---
@@ -756,6 +983,7 @@ Reason:
 
 - `venv/` is local environment data
 - `__pycache__/` is Python cache
+- `*.pyc` files are compiled Python artifacts
 - `logs/*.log` is runtime output
 - `news.db` is a local database file
 
@@ -896,17 +1124,23 @@ Completed
 
 ### Phase 6E — JavaScript Improvements
 
-Planned features:
+Completed features:
 
-- Reload news without full page refresh
-- Show loading state
-- Dynamic messages
-- Improve filter interactions
+- Load `static/app.js` in the browser
+- Capture the reload form submit event
+- Prevent the default form reload with `event.preventDefault()`
+- Call `POST /api/reload` using `fetch()`
+- Receive and parse JSON responses
+- Show `Reloading...` on the reload button
+- Disable the reload button while the collector is running
+- Show reload success or error messages in the dashboard
+- Automatically refresh the dashboard after reload
+- Improve filter and reload button layout with CSS
 
 Status:
 
 ```text
-Next phase
+Completed
 ```
 
 ---
@@ -915,9 +1149,12 @@ Next phase
 
 Planned features:
 
-- Run collector automatically every 5 minutes
-- Use Linux cron or internal scheduler
+- Run collector automatically on a schedule
+- Evaluate Linux cron versus an internal scheduler
 - Track last execution time
+- Track last successful execution
+- Show scheduler status in the dashboard
+- Avoid overlapping collector runs
 
 Status:
 
@@ -1023,9 +1260,11 @@ This project is intended for:
 - SQLite practice
 - FastAPI practice
 - HTML/CSS practice
-- Future JavaScript practice
+- JavaScript practice
 - Logging practice
 - Infrastructure portfolio development
 - Future deployment practice
+- Future automation practice
+- Future AI integration practice
 
-NewsWatch Bot is not just a script. It is being developed as a small local news aggregation system that demonstrates automation, data persistence, modular design, dashboard development, search functionality, and future web application deployment.
+NewsWatch Bot is not just a script. It is being developed as a small local news aggregation system that demonstrates automation, data persistence, modular design, dashboard development, search functionality, API usage, JavaScript interaction, and future web application deployment.
