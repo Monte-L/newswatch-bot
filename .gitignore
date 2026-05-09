@@ -1,5 +1,17 @@
+# Python virtual environment
 venv/
-_pycache__/
+.venv/
+
+# Python cache
+__pycache__/
 *.pyc
-logs/*.log 
+
+# Local database
 news.db
+
+# Logs
+logs/*.log
+
+# Editor/system files
+.vscode/
+.DS_Store
