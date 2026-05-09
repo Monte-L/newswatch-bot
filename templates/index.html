@@ -5,33 +5,49 @@
 <head>
     <meta charset="UTF-8">
     <title>NewsWatch Bot</title>
-    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/static/style.css?v=2">
 </head>
 
 <body>
     <header class="topbar">
-        <div>
+        <div class="topbar-content">
             <h1>NewsWatch Bot</h1>
-            <p>Local RSS news aggregation dashboard</p>
+            <p>Centralized news intelligence from multiple sources</p>
         </div>
     </header>
 
     <main class="container">
-        <section class="metrics">
-            <div class="metric-card">
-                <span class="metric-label">Articles</span>
-                <strong>{{ counts.total_articles }}</strong>
-            </div>
+        <section class="briefing-grid">
+            <article class="brief-card side-brief">
+                <span class="eyebrow">World Brief</span>
+                <h2>Global signals</h2>
+                <p>
+                    International headlines and geopolitical updates collected from multiple
+                    trusted RSS sources.
+                </p>
+            </article>
 
-            <div class="metric-card">
-                <span class="metric-label">Sources</span>
-                <strong>{{ counts.total_sources }}</strong>
-            </div>
+            <article class="brief-card main-brief">
+                <span class="eyebrow">Daily AI Briefing</span>
+                <h2>Today’s intelligence briefing</h2>
+                <p>
+                    A compact briefing layer designed to summarize the most relevant stories,
+                    extract key points, and explain why they matter.
+                </p>
 
-            <div class="metric-card">
-                <span class="metric-label">Categories</span>
-                <strong>{{ counts.total_categories }}</strong>
-            </div>
+                <div class="brief-status">
+                    AI briefing layer in development.
+                </div>
+            </article>
+
+            <article class="brief-card side-brief">
+                <span class="eyebrow">Brazil Brief</span>
+                <h2>Brazil watch</h2>
+                <p>
+                    Brazilian politics, economy, security, and public affairs collected from
+                    national sources.
+                </p>
+            </article>
         </section>
 
         <section class="filters">
@@ -40,7 +56,7 @@
                     <div class="filter-field">
                         <label for="q">Search</label>
                         <input type="text" name="q" id="q" value="{{ search_query or '' }}"
-                            placeholder="Search articles...">
+                            placeholder="Search news, sources, or topics....">
                     </div>
 
                     <div class="filter-field">
@@ -84,6 +100,13 @@
         {% if reloaded %}
         <div class="reload-message">Reload completed. News articles saved: {{ new_articles }}</div>
         {% endif %}
+
+        <div class="section-heading">
+            <div>
+                <span class="eyebrow">Live source feed</span>
+                <h2>Source Feed</h2>
+            </div>
+        </div>
 
         <section class="articles">
             {% if articles %}
