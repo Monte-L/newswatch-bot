@@ -5,3 +5,5 @@ FEEDS_FILE = Path("feeds.txt")
 
 LOG_DIR = Path("logs")
 LOG_FILE = LOG_DIR / "newswatch.log"
+
+LOCK_FILE = Path("newswatch.lock")

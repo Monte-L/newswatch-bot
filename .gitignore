@@ -15,3 +15,6 @@ logs/*.log
 # Editor/system files
 .vscode/
 .DS_Store
+
+# Runtime lock file
+newswatch.lock

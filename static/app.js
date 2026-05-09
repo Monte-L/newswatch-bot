@@ -45,6 +45,15 @@ document.addEventListener("DOMContentLoaded", () => {
             console.log("JSON data:", data);
             console.log(`New articles saved: ${data.new_articles}`);
 
+            if (data.status === "busy"){
+                if (reloadMessage) {
+                    reloadMessage.textContent = "Collector is already running. Try again soon.";
+                    reloadMessage.hidden = false;
+                }
+
+                return;
+            }
+
             if (reloadMessage) {
                 reloadMessage.textContent = `Reload completed. New articles saved: ${data.new_articles}`;
                 reloadMessage.hidden = false;
@@ -53,7 +62,7 @@ document.addEventListener("DOMContentLoaded", () => {
             setTimeout(() =>{
                 window.location.reload();
             }, 1500);
-            
+
         } catch (error) {
             console.error("Reload failed: ", error);
 

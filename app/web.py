@@ -6,6 +6,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
+from app.runtime_lock import collector_lock
 from app.collector import process_feeds
 from app.database import create_database
 from app.queries import (
@@ -92,6 +93,17 @@ def api_reload_news():
     """
 
     create_database()
+    
+    with collector_lock() as lock_acquired:
+        if not lock_acquired:
+            return JSONResponse(
+                {
+                    "status": "busy",
+                    "message": "Collector is already running.",
+                    "new_articles": 0,
+                }
+            )
+            
     total_new_articles = process_feeds()
 
     return JSONResponse(
@@ -112,10 +124,17 @@ def reload_news(
     Manually reload news from the dashboard.
     """
     create_database()  # Ensure database is initialized
-    total_new_articles = process_feeds()
+    
+    with collector_lock() as lock_acquired:
+        if lock_acquired:
+            total_new_articles = process_feeds()
+            reload_status = "1"
+        else:
+            total_new_articles = 0
+            reload_status = "busy"
 
     params = {
-        "reloaded": "1",
+        "reloaded": "reload_status",
         "new_articles": str(total_new_articles),
     }
 
