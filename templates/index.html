@@ -1,16 +1,18 @@
 <!DOCTYPE html>
 
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>NewsWatch Bot</title>
-    <link rel="stylesheet" href="/static/style.css"
+    <link rel="stylesheet" href="/static/style.css">
 </head>
+
 <body>
     <header class="topbar">
         <div>
             <h1>NewsWatch Bot</h1>
-            <p>Local RSS news aggregaton dashboard</p>
+            <p>Local RSS news aggregation dashboard</p>
         </div>
     </header>
 
@@ -35,37 +37,40 @@
         <section class="filters">
             <div class="toolbar">
                 <form method="get" action="/" class="filter-form">
-                    <label for="q">Search</label>
-                    <input
-                        type="text"
-                        name="q"
-                        id="q"
-                        value="{{ search_query or '' }}"
-                        placeholder="Search articles..."
-                    >
+                    <div class="filter-field">
+                        <label for="q">Search</label>
+                        <input type="text" name="q" id="q" value="{{ search_query or '' }}"
+                            placeholder="Search articles...">
+                    </div>
 
-                    <label for="category">Category</label>
-                    <select name="category" id="category">
-                        <option value="">All categories</option>
-                        {% for category in categories %}
-                            <option value="{{ category }}" {% if selected_category == category %}selected{% endif %}>
+                    <div class="filter-field">
+                        <label for="category">Category</label>
+                        <select name="category" id="category">
+                            <option value="">All categories</option>
+                            {% for category in categories %}
+                            <option value="{{ category }}" {% if selected_category==category %}selected{% endif %}>
                                 {{ category }}
                             </option>
-                        {% endfor %}
-                    </select>
+                            {% endfor %}
+                        </select>
+                    </div>
 
-                    <label for="source">Source</label>
-                    <select name="source" id="source">
-                        <option value="">All sources</option>
-                        {% for source in sources %}
-                            <option value="{{ source }}" {% if selected_source == source %}selected{% endif %}>
+                    <div class="filter-field">
+                        <label for="source">Source</label>
+                        <select name="source" id="source">
+                            <option value="">All sources</option>
+                            {% for source in sources %}
+                            <option value="{{ source }}" {% if selected_source==source %}selected{% endif %}>
                                 {{ source }}
                             </option>
-                        {% endfor %}
-                    </select>
+                            {% endfor %}
+                        </select>
+                    </div>
 
-                    <button type="submit">Apply filters</button>
-                    <a class="clear-link" href="/">Clear</a>
+                    <div class="filter-actions">
+                        <button class="apply-button" type="submit">Apply filters</button>
+                        <a class="clear-link" href="/">Clear</a>
+                    </div>
                 </form>
 
                 <form method="post" action="/reload" class="reload-form" id="reload-form">
@@ -74,53 +79,56 @@
             </div>
         </section>
 
-        {% if reloaaded %}
-            <div class="reload-message">Reload completed. News articles saved: {{ new_articles }}</div>
+        <div id="reload-message" class="reload-message" hidden></div>
+
+        {% if reloaded %}
+        <div class="reload-message">Reload completed. News articles saved: {{ new_articles }}</div>
         {% endif %}
 
         <section class="articles">
             {% if articles %}
-                {% for article in articles %}
-                    <article class="article-card">
-                        {% if article.image_url %}
-                            <img class="article-image" src="{{ article.image_url }}" alt="Article image">
-                        {% endif %}
+            {% for article in articles %}
+            <article class="article-card">
+                {% if article.image_url %}
+                <img class="article-image" src="{{ article.image_url }}" alt="Article image">
+                {% endif %}
 
-                        <div class="article-content">
-                            <div class="article-meta">
-                                <span>{{ article.source }}</span>
-                                <span>{{ article.category }}</span>
-                            </div>
+                <div class="article-content">
+                    <div class="article-meta">
+                        <span>{{ article.source }}</span>
+                        <span>{{ article.category }}</span>
+                    </div>
 
-                            <h2>{{ article.title }}</h2>
+                    <h2>{{ article.title }}</h2>
 
-                            {% if article.summary %}
-                                <p>{{ article.summary }}</p>
-                            {% else %}
-                                <p class="muted">No summary available from RSS feed.</p>
-                            {% endif %}
+                    {% if article.summary %}
+                    <p>{{ article.summary }}</p>
+                    {% else %}
+                    <p class="muted">No summary available from RSS feed.</p>
+                    {% endif %}
 
-                            <div class="article-footer">
-                                <span>{{ article.published }}</span>
+                    <div class="article-footer">
+                        <span>{{ article.published }}</span>
 
-                                <div class="article-actions">
-                                    <a href="/articles/{{ article.id }}">
-                                        Read preview
-                                    </a>
+                        <div class="article-actions">
+                            <a href="/articles/{{ article.id }}">
+                                Read preview
+                            </a>
 
-                                    <a href="{{ article.link }}" target="_blank" rel="noopener noreferrer">
-                                        Open original
-                                    </a>
-                                </div>
-                            </div>
+                            <a href="{{ article.link }}" target="_blank" rel="noopener noreferrer">
+                                Open original
+                            </a>
                         </div>
-                    </article>
-                {% endfor %}
+                    </div>
+                </div>
+            </article>
+            {% endfor %}
             {% else %}
-                <p class="empty-state">No articles found for the selected filters.</p>
+            <p class="empty-state">No articles found for the selected filters.</p>
             {% endif %}
         </section>
     </main>
     <script src="/static/app.js"></script>
 </body>
+
 </html>

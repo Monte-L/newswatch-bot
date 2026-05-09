@@ -3,26 +3,29 @@ from typing import Optional
 
 from app.config import DB_FILE
 
+
 def get_connection():
     """
-    Create a SQLite connection configured to return rows as directionary-like objects.
+    Create a SQLite connection configured to return rows as dictionary-like objects.
     """
     connection = sqlite3.connect(DB_FILE)
     connection.row_factory = sqlite3.Row
     return connection
 
+
 def get_recent_articles(
-        limit: int = 50,
-        category: Optional[str] = None,
-        source: Optional[str] = None,
-        search: Optional[str] = None,
+    limit: int = 50,
+    category: Optional[str] = None,
+    source: Optional[str] = None,
+    search: Optional[str] = None,
 ):
     """
     Return recent articles from the database.
-    
+
     Optional filters:
     - category
     - source
+    - search
     """
 
     connection = get_connection()
@@ -64,13 +67,15 @@ def get_recent_articles(
         """
 
         search_pattern = f"%{search}%"
-        params.extend([
-            search_pattern,
-            search_pattern,
-            search_pattern,
-            search_pattern,
-        ])
-    
+        params.extend(
+            [
+                search_pattern,
+                search_pattern,
+                search_pattern,
+                search_pattern,
+            ]
+        )
+
     query += """ 
         ORDER BY published DESC 
         LIMIT ?
@@ -82,6 +87,7 @@ def get_recent_articles(
 
     connection.close()
     return [dict(article) for article in articles]
+
 
 def get_categories():
     """
@@ -102,6 +108,7 @@ def get_categories():
 
     connection.close()
     return categories
+
 
 def get_sources():
     """
@@ -124,6 +131,7 @@ def get_sources():
     connection.close()
     return sources
 
+
 def get_article_counts():
     """
     Return basic dashboard metrics for articles collected in the last 3 days.
@@ -132,7 +140,9 @@ def get_article_counts():
     connection = get_connection()
     cursor = connection.cursor()
 
-    cursor.execute("SELECT COUNT(*) count FROM articles WHERE fetched_at >= datetime('now', '-3 days')")
+    cursor.execute(
+        "SELECT COUNT(*) count FROM articles WHERE fetched_at >= datetime('now', '-3 days')"
+    )
     total_articles = cursor.fetchone()[0]
 
     cursor.execute("""
@@ -160,6 +170,7 @@ def get_article_counts():
         "total_categories": total_categories,
     }
 
+
 def get_article_by_id(article_id: str):
     """
     Return a single article by its ID.
@@ -168,7 +179,8 @@ def get_article_by_id(article_id: str):
     connection = get_connection()
     cursor = connection.cursor()
 
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT
             id,
             title,
@@ -181,7 +193,9 @@ def get_article_by_id(article_id: str):
             fetched_at
         FROM articles
         WHERE id = ?
-    """, (article_id,))
+    """,
+        (article_id,),
+    )
 
     article = cursor.fetchone()
 
@@ -189,5 +203,5 @@ def get_article_by_id(article_id: str):
 
     if article is None:
         return None
-    
+
     return dict(article)

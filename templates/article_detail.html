@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <title>{{ article.title}} | NewsWatch Bot</title>
-    <link rel="stylesheet" href="/static/style.css"
+    <title>{{ article.title }} | NewsWatch Bot</title>
+    <link rel="stylesheet" href="/static/style.css">
 </head>
+
 <body>
     <header class="topbar">
         <div>
@@ -18,7 +20,7 @@
 
         <article class="detail-card">
             {% if article.image_url %}
-                <img class="detail-image" src="{{ article.image_url }}" alt="">
+            <img class="detail-image" src="{{ article.image_url }}" alt="Article Image">
             {% endif %}
 
             <div class="detail-content">
@@ -31,15 +33,15 @@
                 <h2>{{ article.title }}</h2>
 
                 {% if article.summary %}
-                    <section class="detail-section">
-                        <h3>RSS Summary</h3>
-                        <p>{{ article.summary }}</p>
-                    </section>
+                <section class="detail-section">
+                    <h3>RSS Summary</h3>
+                    <p>{{ article.summary }}</p>
+                </section>
                 {% else %}
-                    <section class="detail-section">
-                        <h3>RSS Summary</h3>
-                        <p class="muted">No summary available from RSS feed.</p>
-                    </section>
+                <section class="detail-section">
+                    <h3>RSS Summary</h3>
+                    <p class="muted">No summary available from RSS feed.</p>
+                </section>
                 {% endif %}
 
                 <section class="detail-section">
@@ -59,4 +61,5 @@
         </article>
     </main>
 </body>
+
 </html>

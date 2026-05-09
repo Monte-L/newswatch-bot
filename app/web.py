@@ -24,7 +24,6 @@ templates = Jinja2Templates(directory="templates")
 
 
 @app.get("/", response_class=HTMLResponse)
-
 def dashboard(
     request: Request,
     category: Optional[str] = None,
@@ -65,6 +64,7 @@ def dashboard(
         },
     )
 
+
 @app.get("/articles/{article_id}", response_class=HTMLResponse)
 def article_detail(request: Request, article_id: str):
     """
@@ -74,8 +74,8 @@ def article_detail(request: Request, article_id: str):
     article = get_article_by_id(article_id)
 
     if article is None:
-        raise HTTPException(status_code=404, detail="Artile not found")
-    
+        raise HTTPException(status_code=404, detail="Article not found")
+
     return templates.TemplateResponse(
         request=request,
         name="article_detail.html",
@@ -83,6 +83,7 @@ def article_detail(request: Request, article_id: str):
             "article": article,
         },
     )
+
 
 @app.post("/api/reload")
 def api_reload_news():
@@ -95,10 +96,11 @@ def api_reload_news():
 
     return JSONResponse(
         {
-            "status" : "sucess",
-            "new_articles" : total_new_articles,
+            "status": "success",
+            "new_articles": total_new_articles,
         }
     )
+
 
 @app.post("/reload")
 def reload_news(
@@ -119,7 +121,7 @@ def reload_news(
 
     if category:
         params["category"] = category
-    
+
     if source:
         params["source"] = source
 
