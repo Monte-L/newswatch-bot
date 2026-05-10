@@ -1,10 +1,10 @@
 # NewsWatch Bot
 
-NewsWatch Bot is a Linux-based Python project designed to collect, store, classify, search, and organize news from RSS feeds.
+NewsWatch Bot is a Linux-based Python project designed to collect, store, classify, search, summarize, and organize news from RSS feeds.
 
-The project started as a command-line RSS collector and is gradually evolving into a centralized news platform with structured data, automatic background collection, logging, categorization, a FastAPI + HTML/CSS/JavaScript interface, article preview pages, keyword search, reload API routes, collector execution history, and future support for AI summaries, topic grouping, source comparison, automation, and production deployment.
+The project started as a command-line RSS collector and has evolved into a centralized news intelligence platform with structured data, automatic background collection, logging, categorization, a FastAPI + HTML/CSS/JavaScript interface, article preview pages, keyword search, reload API routes, collector execution history, AI-generated article summaries, a daily intelligence briefing, and future support for topic grouping, source comparison, automation, and production deployment.
 
-The long-term goal is not only to provide a technical dashboard, but to build a public-facing news platform that helps users understand what is happening across multiple sources without manually opening many different news websites.
+The long-term goal is not only to provide a technical dashboard, but to build a public-facing news intelligence platform that helps users understand what is happening across multiple sources without manually opening many different news websites.
 
 ---
 
@@ -22,15 +22,15 @@ The goal of this project is to build an automated news aggregation and interpret
 - FastAPI
 - HTML/CSS
 - JavaScript
-- Future AI-assisted summaries
+- Anthropic API (Claude Haiku) for AI summaries and daily briefings
 - Future topic-based grouping
 - Future source comparison
 - Future automation and notifications
 - Future production deployment with PostgreSQL
 
-The final objective is to centralize relevant news from multiple sources into a single platform, allowing articles to be collected, filtered, searched, categorized, reviewed, refreshed, interpreted, and eventually summarized with AI.
+The final objective is to centralize relevant news from multiple sources into a single platform, allowing articles to be collected, filtered, searched, categorized, reviewed, refreshed, interpreted, and summarized with AI.
 
-The platform should help users quickly understand:
+The platform helps users quickly understand:
 
 - What happened
 - Why it matters
@@ -48,7 +48,7 @@ The original source link should always remain visible.
 Current completed phase:
 
 ```text
-Phase 7D — Automatic background collection and collector run history
+Phase 8B-4 — Brazil Brief, classifier refinement, AI integration
 ```
 
 The project is currently working with:
@@ -72,11 +72,18 @@ The project is currently working with:
 - Collector lock file to prevent overlapping runs
 - Collector execution history stored in SQLite
 - Collector run status tracking with `running`, `success`, `failed`, and `skipped` statuses
+- World Brief block filtered by foreign sources
+- Brazil Brief block filtered by Brazilian sources
+- Improved keyword classifier with word-boundary matching and priority-based tiebreak
+- AI-generated summaries for articles in relevant categories
+- AI-generated daily briefing using all relevant articles from the last 24 hours
+- `systemd timer` for batch AI summary processing every 15 minutes
+- `systemd timer` for daily briefing generation every 2 hours
 
 Next planned phase:
 
 ```text
-Phase 8 — Public news platform interface direction
+Phase 9 — Public-facing layout redesign
 ```
 
 ---
@@ -93,7 +100,8 @@ Phase 8 — Public news platform interface direction
 - Clean HTML from RSS summaries
 - Limit long RSS summaries for dashboard readability
 - Extract image URLs from RSS media fields when available
-- Classify articles using rule-based keyword matching
+- Classify articles using rule-based keyword matching with word-boundary matching
+- Apply explicit priority order to break classifier ties
 - Organize the code into Python modules
 - Display articles in a FastAPI + HTML dashboard
 - Filter articles by category
@@ -120,22 +128,32 @@ Phase 8 — Public news platform interface direction
 - Track how many new articles were saved by each collector run
 - Track collector errors when a run fails
 - Read the latest collector execution record from SQLite
+- Display a World Brief block filtered by foreign sources
+- Display a Brazil Brief block filtered by Brazilian sources
+- Generate AI summaries for articles in Politics, Economy, Security, and International categories
+- Use longer AI summaries (2–3 lines) for Politics, Economy, and Security
+- Use shorter AI summaries (1 line) for International
+- Generate a structured daily briefing with four sections: General Scenario, World, Brazil, and Why It Matters Today
+- Store AI summaries directly in the `articles` table
+- Store generated daily briefings in a dedicated `daily_briefings` table
+- Track AI usage with input and output token counts and model used
+- Process pending AI summaries automatically every 15 minutes
+- Generate a new daily briefing automatically every 2 hours
 
 ---
 
 ## Planned Features
 
-- Create a separate public reading interface for the news platform
+- Redesign the public reading interface with intelligence-platform aesthetics
 - Keep technical collector/status information in an internal admin area
 - Add topic-based news grouping
-- Add AI-generated summaries and context
-- Add AI-generated key points and “why this matters” sections
+- Add AI-generated key points and full "why this matters" sections per article
 - Compare coverage from multiple sources when possible
 - Add source reliability and attribution notes
 - Add JSON API endpoints for public article/topic listing
 - Improve JavaScript interactions further
 - Update article lists dynamically without full page reload
-- Improve category classification
+- Improve category classification through AI-assisted reclassification
 - Improve RSS image extraction
 - Normalize RSS published dates
 - Add dashboard placeholder when no article image is available
@@ -174,7 +192,7 @@ HTML/CSS/JavaScript Interface
 Automatic collection architecture:
 
 ```text
-systemd timer
+systemd timer (collector, every 15 minutes)
    ↓
 newswatch-collector.service
    ↓
@@ -187,6 +205,38 @@ RSS Collector
 SQLite Database
    ↓
 collector_runs execution history
+```
+
+AI processing architecture:
+
+```text
+systemd timer (ai-processor, every 15 minutes)
+   ↓
+newswatch-ai-processor.service
+   ↓
+python -m app.ai_processor
+   ↓
+SQLite query for pending relevant articles
+   ↓
+Anthropic API (Claude Haiku) — one call per article
+   ↓
+ai_summary column on articles table
+```
+
+Daily briefing generation architecture:
+
+```text
+systemd timer (briefing, every 2 hours)
+   ↓
+newswatch-briefing.service
+   ↓
+python -m app.briefing_processor
+   ↓
+SQLite query for last 24h articles with ai_summary
+   ↓
+Anthropic API (Claude Haiku) — one consolidation call
+   ↓
+daily_briefings table
 ```
 
 Current reload flow:
@@ -233,26 +283,28 @@ Nginx or Caddy Reverse Proxy
 Public Domain + HTTPS
 ```
 
-The collector runs independently from the FastAPI web application. This keeps background collection separate from the public web interface and prepares the project for a more production-oriented deployment model.
+The collector runs independently from the FastAPI web application. The AI processor and the briefing generator also run independently. This separation keeps background workloads from blocking the public web interface and prepares the project for a more production-oriented deployment model.
 
 ---
 
 ## Product Direction
 
-The current interface should be understood as an initial prototype and internal/admin-style interface.
+The current interface should be understood as an internal prototype while the public layout is being redesigned.
 
-The long-term product direction is to evolve NewsWatch Bot into a public-facing centralized news platform.
+The long-term product direction is to evolve NewsWatch Bot into a public-facing centralized news intelligence platform.
 
 The future platform should provide:
 
 - Public reading pages
+- A prominent daily intelligence briefing as the entry point
+- World Brief and Brazil Brief as scannable side feeds
+- A live source feed with the most recently collected articles
 - Search and navigation by category/topic
-- Latest news sections
 - Topic-based article grouping
 - AI-generated summaries
 - AI-generated context
 - AI-generated key points
-- “Why this matters” explanations
+- "Why this matters" explanations
 - Source comparison when multiple sources cover the same topic
 - Links and attribution to original sources
 - A separate internal/admin/status area for monitoring collectors and system health
@@ -269,6 +321,9 @@ Current project structure:
 newswatch-bot/
 ├── app/
 │   ├── __init__.py
+│   ├── ai.py
+│   ├── ai_processor.py
+│   ├── briefing_processor.py
 │   ├── classifier.py
 │   ├── collector.py
 │   ├── config.py
@@ -287,13 +342,15 @@ newswatch-bot/
 ├── templates/
 │   ├── index.html
 │   └── article_detail.html
+├── .env
+├── .gitignore
 ├── news_bot.py
 ├── news.db
 ├── README.md
 └── requirements.txt
 ```
 
-Runtime files such as `news.db`, `logs/newswatch.log`, and `newswatch.lock` are local development artifacts and should not be committed to GitHub.
+Runtime files such as `news.db`, `logs/newswatch.log`, `newswatch.lock`, `news.db.backup-*`, and `.env` are local development artifacts and should not be committed to GitHub.
 
 ---
 
@@ -303,19 +360,23 @@ Runtime files such as `news.db`, `logs/newswatch.log`, and `newswatch.lock` are 
 |---|---|
 | `app/config.py` | Stores project configuration such as database path, feeds file path, log file path, and lock file path |
 | `app/logging_config.py` | Configures terminal and file logging |
-| `app/database.py` | Handles SQLite database creation, migrations, article IDs, article persistence, and collector run history |
-| `app/classifier.py` | Classifies articles using rule-based keyword matching |
+| `app/database.py` | Handles SQLite database creation, migrations, article IDs, article persistence, collector run history, and the `daily_briefings` table |
+| `app/classifier.py` | Classifies articles using rule-based keyword matching with word-boundary matching and priority-based tiebreak |
 | `app/metadata.py` | Extracts summaries, cleans HTML, limits text length, and extracts image URLs |
 | `app/collector.py` | Loads RSS feeds, parses articles, extracts metadata, classifies articles, and saves them |
-| `app/queries.py` | Reads articles, categories, sources, article details, dashboard metrics, and collector run status from SQLite |
+| `app/queries.py` | Reads articles, categories, sources, article details, dashboard metrics, collector run status, World Brief, and Brazil Brief from SQLite |
 | `app/runtime_lock.py` | Provides a lock file mechanism to prevent overlapping collector executions |
 | `app/web.py` | Defines the FastAPI application, dashboard routes, article routes, reload routes, and API routes |
+| `app/ai.py` | Provides AI summary generation for articles and daily briefing generation using the Anthropic API |
+| `app/ai_processor.py` | Batch processor that picks pending articles and generates AI summaries; runs from `systemd` |
+| `app/briefing_processor.py` | Generates and persists the daily briefing; runs from `systemd` |
 | `news_bot.py` | Main command-line entry point used to run the collector manually or through systemd |
 | `templates/index.html` | Main HTML template for the current interface |
 | `templates/article_detail.html` | Local article preview page template |
 | `static/style.css` | Interface and article page styling |
 | `static/app.js` | Handles JavaScript behavior, reload API calls, loading state, dynamic messages, and automatic refresh |
 | `feeds.txt` | Stores RSS feed URLs used by the collector |
+| `.env` | Stores the `ANTHROPIC_API_KEY` for AI features (local only, ignored by Git) |
 | `requirements.txt` | Lists Python dependencies required to run the project |
 
 ---
@@ -331,6 +392,8 @@ Main dependencies:
 - `fastapi`
 - `uvicorn`
 - `jinja2`
+- `anthropic`
+- `python-dotenv`
 
 The project also uses Python standard library modules such as:
 
@@ -376,8 +439,48 @@ pip install -r requirements.txt
 If dependencies need to be installed manually:
 
 ```bash
-python -m pip install feedparser beautifulsoup4 fastapi uvicorn jinja2
+python -m pip install feedparser beautifulsoup4 fastapi uvicorn jinja2 anthropic python-dotenv
 python -m pip freeze > requirements.txt
+```
+
+---
+
+## Environment Configuration
+
+The AI features require an Anthropic API key.
+
+Create a `.env` file in the project root:
+
+```text
+ANTHROPIC_API_KEY=sk-ant-your-key-here
+```
+
+The `.env` file is local only. It is listed in `.gitignore` and must never be committed to GitHub.
+
+To confirm Git is ignoring the `.env` file:
+
+```bash
+git check-ignore -v .env
+```
+
+Expected output:
+
+```text
+.gitignore:NN:.env  .env
+```
+
+The project loads the key automatically using `python-dotenv` when `app/ai.py` is imported.
+
+To test the key without using the AI features:
+
+```bash
+python -c "
+from dotenv import load_dotenv
+import os
+load_dotenv()
+key = os.getenv('ANTHROPIC_API_KEY')
+print('OK' if key else 'KEY NOT FOUND')
+"
 ```
 
 ---
@@ -416,70 +519,120 @@ The bot will:
 
 ---
 
-## Automatic Collection with systemd
+## Running the AI Processor Manually
 
-The project can run the RSS collector automatically using a `systemd` user timer.
+The AI processor generates AI summaries for articles that are pending and belong to relevant categories.
 
-The timer calls a one-shot service that runs the collector entry point:
+Activate the virtual environment:
 
-```text
-newswatch-collector.timer
-   ↓
-newswatch-collector.service
-   ↓
-python news_bot.py
+```bash
+source venv/bin/activate
 ```
 
-The collector runs independently from the FastAPI web process.
+Run the processor:
+
+```bash
+python -m app.ai_processor
+```
+
+Each run processes at most `MAX_ARTICLES_PER_RUN` articles (currently 30) to keep cost predictable.
+
+The processor skips articles that:
+
+- Already have an `ai_summary` value
+- Have no source `summary` to summarize
+- Belong to categories outside the relevant set
+
+---
+
+## Running the Briefing Generator Manually
+
+The briefing generator consolidates AI summaries from the last 24 hours into a single structured daily briefing.
+
+Activate the virtual environment:
+
+```bash
+source venv/bin/activate
+```
+
+Run the generator:
+
+```bash
+python -m app.briefing_processor
+```
+
+Each run produces one entry in the `daily_briefings` table. Older entries are retained for history.
+
+---
+
+## Automatic Background Execution with systemd
+
+The project runs three coordinated `systemd` user timers.
+
+| Timer | Frequency | Purpose |
+|---|---|---|
+| `newswatch-collector.timer` | every 15 minutes | Collect new articles from RSS feeds |
+| `newswatch-ai-processor.timer` | every 15 minutes | Generate AI summaries for pending relevant articles |
+| `newswatch-briefing.timer` | every 2 hours | Generate the consolidated daily briefing |
+
+Each timer triggers a corresponding one-shot service:
+
+```text
+newswatch-collector.timer    → newswatch-collector.service    → python news_bot.py
+newswatch-ai-processor.timer → newswatch-ai-processor.service → python -m app.ai_processor
+newswatch-briefing.timer     → newswatch-briefing.service     → python -m app.briefing_processor
+```
+
+All services run independently from the FastAPI web process.
 
 Useful commands:
 
-Start the timer:
+Start all timers:
 
 ```bash
 systemctl --user start newswatch-collector.timer
+systemctl --user start newswatch-ai-processor.timer
+systemctl --user start newswatch-briefing.timer
 ```
 
-Stop the timer:
+Stop all timers:
 
 ```bash
 systemctl --user stop newswatch-collector.timer
+systemctl --user stop newswatch-ai-processor.timer
+systemctl --user stop newswatch-briefing.timer
 ```
 
-Enable and start the timer:
+Enable timers to start at boot:
 
 ```bash
-systemctl --user enable --now newswatch-collector.timer
+systemctl --user enable newswatch-collector.timer
+systemctl --user enable newswatch-ai-processor.timer
+systemctl --user enable newswatch-briefing.timer
 ```
 
-Check timer status:
+List NewsWatch timers and their next scheduled execution:
 
 ```bash
-systemctl --user status newswatch-collector.timer
+systemctl --user list-timers | grep newswatch
 ```
 
-List timers:
+Check the status of a specific timer:
 
 ```bash
-systemctl --user list-timers --all | grep newswatch
+systemctl --user status newswatch-briefing.timer
 ```
 
-Run the collector service manually:
+Check the status of a specific service:
 
 ```bash
-systemctl --user start newswatch-collector.service
+systemctl --user status newswatch-briefing.service
 ```
 
-Check service status:
+Read recent systemd logs for a service:
 
 ```bash
-systemctl --user status newswatch-collector.service
-```
-
-Read systemd logs:
-
-```bash
-journalctl --user -u newswatch-collector.service -n 60 --no-pager
+journalctl --user -u newswatch-ai-processor.service -n 60 --no-pager
 ```
 
 The collector is also logged to:
@@ -512,6 +665,9 @@ http://127.0.0.1:8000
 
 The current interface displays:
 
+- Daily Briefing block (placeholder, layout redesign in progress)
+- World Brief block with recent international headlines
+- Brazil Brief block with recent Brazilian headlines
 - Total articles
 - Total sources
 - Total categories
@@ -671,11 +827,10 @@ The preview page displays:
 - Published date
 - Image when available
 - RSS summary when available
+- AI summary when available
 - Original article link
 
 This page uses metadata stored in SQLite and does not copy the full article content from the original source.
-
-Future AI summaries may be added to this page.
 
 ---
 
@@ -695,19 +850,14 @@ https://www.theguardian.com/world/rss
 https://rss.nytimes.com/services/xml/rss/nyt/World.xml
 ```
 
-To add or remove sources, edit `feeds.txt`.
-
-The collector does not need code changes when RSS sources are updated.
+To add or remove sources, edit `feeds.txt`. The collector does not need code changes when RSS sources are updated.
 
 Current feeds include a mix of:
 
-- International news
-- Brazilian news
-- Technology
-- Business
-- Environment
-- Science
-- Public or institutional sources
+- International news (BBC, Guardian, NYT, Deutsche Welle, France 24, Euronews)
+- Brazilian news (UOL, Folha, CNN Brasil, Agência Pública, Intercept Brasil, Agência Brasil)
+- Technology, business, environment, and science feeds from the same sources
+- Public or institutional sources (NASA)
 
 Future improvement:
 
@@ -745,11 +895,12 @@ Main tables:
 ```text
 articles
 collector_runs
+daily_briefings
 ```
 
 SQLite is being used during the local prototype stage because it is simple, lightweight, and suitable for development.
 
-PostgreSQL may be introduced later when the project is prepared for production deployment, public access, scheduled background collection, heavier usage, and AI-generated summaries.
+PostgreSQL may be introduced later when the project is prepared for production deployment, public access, scheduled background collection, heavier usage, and AI-generated content at scale.
 
 ---
 
@@ -767,7 +918,9 @@ CREATE TABLE IF NOT EXISTS articles (
     summary TEXT,
     image_url TEXT,
     published TEXT,
-    fetched_at TEXT NOT NULL
+    fetched_at TEXT NOT NULL,
+    ai_summary TEXT,
+    ai_summary_at TEXT
 );
 ```
 
@@ -782,6 +935,20 @@ CREATE TABLE IF NOT EXISTS collector_runs (
     new_articles INTEGER DEFAULT 0,
     duration_seconds REAL,
     error_message TEXT
+);
+```
+
+Daily briefings table:
+
+```sql
+CREATE TABLE IF NOT EXISTS daily_briefings (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    generated_at TEXT NOT NULL,
+    content TEXT NOT NULL,
+    articles_considered INTEGER NOT NULL,
+    input_tokens INTEGER,
+    output_tokens INTEGER,
+    model_used TEXT
 );
 ```
 
@@ -800,6 +967,8 @@ CREATE TABLE IF NOT EXISTS collector_runs (
 | `image_url` | Image URL extracted from RSS media fields when available |
 | `published` | Publication date provided by the RSS feed |
 | `fetched_at` | UTC timestamp when the bot collected the article |
+| `ai_summary` | AI-generated summary in Portuguese (only for relevant categories) |
+| `ai_summary_at` | UTC timestamp when the AI summary was generated |
 
 ---
 
@@ -827,6 +996,26 @@ Tracked fields include:
 | `error_message` | Error message when a run fails or is skipped |
 
 This execution history is intended for internal monitoring, admin/status pages, troubleshooting, and future automation alerts.
+
+---
+
+## Daily Briefings History
+
+The project stores every generated daily briefing in the `daily_briefings` table.
+
+Tracked fields:
+
+| Column | Description |
+|---|---|
+| `id` | Unique briefing identifier |
+| `generated_at` | UTC timestamp when the briefing was generated |
+| `content` | The full briefing text |
+| `articles_considered` | How many articles were used as input |
+| `input_tokens` | Anthropic API input tokens consumed |
+| `output_tokens` | Anthropic API output tokens generated |
+| `model_used` | Model identifier used to generate the briefing |
+
+Older briefings are retained for history and auditability rather than overwritten.
 
 ---
 
@@ -882,7 +1071,7 @@ The lock file is a runtime artifact and should not be committed to GitHub.
 
 ## Categories
 
-The project currently uses rule-based classification.
+The project currently uses rule-based classification with word-boundary matching.
 
 Current categories:
 
@@ -899,28 +1088,81 @@ Current categories:
 The classifier checks keywords in:
 
 ```text
-title + summary + source
+title + summary
 ```
 
-Example:
+The `source` field is intentionally excluded from the matched text to avoid the source name biasing classification (for example, the word "Brasil" in "CNN Brasil" should not affect category selection).
+
+Each keyword is matched as a whole word using regex word boundaries (`\b`), which avoids false positives such as matching "ia" inside "Brasília" or "tech" inside "technical".
+
+When multiple categories tie on score, a fixed priority order resolves the winner:
 
 ```text
-"dollar", "inflation", "central bank" → Economy
-"government", "congress", "president" → Politics
-"police", "crime", "investigation" → Security
-"software", "AI", "chip", "automation" → Technology
+International → Health → Sports → Environment → Security → Economy → Technology → Politics
 ```
 
-This approach is simple, transparent, and easy to improve later.
+The priority is intentional. More specific categories beat broader ones. Politics is the broadest topic and absorbs noise, so it is the last fallback before `General`.
 
 Future improvements may include:
 
-- Better keyword sets
-- Multiple languages
-- Full-word matching
-- Weighted keyword scoring
+- AI-assisted reclassification of existing articles
+- Multilingual keyword expansion
 - Feed-based category defaults
-- NLP or AI-assisted classification
+- Weighted keyword scoring
+
+---
+
+## AI Integration
+
+The project uses the Anthropic API (Claude Haiku) for two distinct tasks.
+
+### Article summaries
+
+Articles in the categories Politics, Economy, Security, and International receive an AI-generated summary in Portuguese.
+
+The prompt length adapts to category:
+
+- Politics, Economy, Security: 2 to 3 lines per article (high priority)
+- International: 1 line per article
+
+Summaries are written to be factual, direct, and free of opinion. Filler phrases like "O artigo fala sobre..." are avoided by prompt design.
+
+Articles in other categories are stored normally and displayed in the source feed, but do not receive an AI summary. This keeps cost predictable and focuses interpretation effort on news that benefits most from it.
+
+### Daily briefing
+
+The daily briefing consolidates all relevant articles from the last 24 hours into a structured intelligence brief.
+
+Structure of every briefing:
+
+- **Cenário geral** — two lines synthesizing the overall tone of the day
+- **Mundo** — three to four lines connecting the main international fios geopolitical and economic threads
+- **Brasil** — three to four lines covering political, economic, and security movements in Brazil
+- **Por que importa hoje** — two lines explaining what makes the day significant
+
+The briefing is generated by passing every article's title, source, category, and `ai_summary` to a single Anthropic API call. The model is instructed to connect related stories rather than only paraphrasing each one.
+
+### Cost model
+
+Approximate cost per article summary:
+
+- ~150 input tokens × $1/M = $0.00015
+- ~50 output tokens × $5/M = $0.00025
+- Total per article: about $0.0004
+
+Approximate cost per daily briefing:
+
+- ~3000 input tokens × $1/M = $0.003
+- ~600 output tokens × $5/M = $0.003
+- Total per briefing: about $0.006
+
+With the default schedule (15-minute AI processor, 2-hour briefing) and an estimated 100 new relevant articles per day:
+
+- Article summaries: about $0.05 per day
+- Daily briefings: about $0.07 per day
+- Total: under $5 per month
+
+The `MAX_ARTICLES_PER_RUN` constant in `app/ai_processor.py` (currently 30) acts as a safety limit and caps the cost of any single run to a few cents.
 
 ---
 
@@ -989,6 +1231,38 @@ This is more stable than ordering by the RSS `published` field because RSS feeds
 
 ---
 
+## World Brief and Brazil Brief
+
+The interface includes two curated side blocks.
+
+### World Brief
+
+Filtered by **source** rather than category. Only articles from foreign sources appear here:
+
+- BBC News
+- The Guardian (World, Business, Technology, Environment)
+- New York Times (World, Business, Technology, Science)
+- Deutsche Welle (and DW Europe)
+- France 24
+- Euronews
+
+This separation makes the World Brief read as "what foreign newsrooms are saying", complementing the Brazil Brief.
+
+### Brazil Brief
+
+Filtered by **source** as well. Only articles from Brazilian sources appear:
+
+- Agência Pública
+- CNN Brasil
+- Agência Brasil (Feed Últimas)
+- Folha de S.Paulo
+- Intercept Brasil
+- UOL Notícias
+
+This split avoids overlap between the two blocks and gives each one a clear identity.
+
+---
+
 ## JavaScript Behavior
 
 The project currently uses `static/app.js` to improve the interface experience.
@@ -1009,40 +1283,6 @@ Current JavaScript behavior:
 - Refreshes the page automatically after successful reload
 
 This creates a better user experience while keeping a traditional `/reload` route available as a fallback.
-
----
-
-## Future AI Summary Layer
-
-A future phase may add AI-generated summaries to article preview pages and topic pages.
-
-The AI summary should be based on available RSS metadata and/or permitted source content.
-
-Potential future fields:
-
-```sql
-ai_summary TEXT
-ai_key_points TEXT
-ai_context TEXT
-ai_importance TEXT
-ai_generated_at TEXT
-ai_model TEXT
-content_policy TEXT
-```
-
-The goal is to provide a useful interpretation layer without copying full articles or replacing the original source.
-
-Potential AI output:
-
-- Short summary
-- Key points
-- Context
-- Why this matters
-- Related topics
-- Source comparison
-- Uncertainty or missing information
-
-The original source link should always remain visible.
 
 ---
 
@@ -1074,17 +1314,13 @@ The log file records:
 - When the collector lock is released
 - When the bot finishes
 
+The AI processor and the briefing generator log to systemd journal (visible with `journalctl --user`).
+
 Useful log commands:
 
 ```bash
 tail logs/newswatch.log
-```
-
-```bash
 tail -n 40 logs/newswatch.log
-```
-
-```bash
 tail -f logs/newswatch.log
 ```
 
@@ -1122,6 +1358,12 @@ Show the collector runs table schema:
 .schema collector_runs
 ```
 
+Show the daily briefings table schema:
+
+```sql
+.schema daily_briefings
+```
+
 Count all stored articles:
 
 ```sql
@@ -1155,34 +1397,48 @@ GROUP BY category
 ORDER BY COUNT(*) DESC;
 ```
 
-Show articles that have images:
+Show articles that already have an AI summary:
 
 ```sql
-SELECT title, image_url
+SELECT title, category, ai_summary
 FROM articles
-WHERE image_url IS NOT NULL
-AND image_url != ''
+WHERE ai_summary IS NOT NULL
+ORDER BY ai_summary_at DESC
 LIMIT 10;
 ```
 
-Search articles manually in SQLite:
+Count pending articles per category (relevant categories only):
 
 ```sql
-SELECT title, source, category
+SELECT category, COUNT(*)
 FROM articles
-WHERE title LIKE '%economy%'
-OR summary LIKE '%economy%'
-ORDER BY fetched_at DESC
-LIMIT 10;
+WHERE category IN ('Politics', 'Economy', 'Security', 'International')
+  AND (ai_summary IS NULL OR ai_summary = '')
+GROUP BY category;
 ```
 
-Check latest collected articles:
+Show recent daily briefings:
 
 ```sql
-SELECT title, source, fetched_at
-FROM articles
-ORDER BY fetched_at DESC
-LIMIT 20;
+SELECT
+    id,
+    generated_at,
+    articles_considered,
+    input_tokens,
+    output_tokens,
+    model_used
+FROM daily_briefings
+ORDER BY id DESC
+LIMIT 5;
+```
+
+Read the latest daily briefing in full:
+
+```sql
+SELECT content
+FROM daily_briefings
+ORDER BY id DESC
+LIMIT 1;
 ```
 
 Show recent collector runs:
@@ -1248,6 +1504,18 @@ Run the collector manually:
 python news_bot.py
 ```
 
+Run the AI processor manually:
+
+```bash
+python -m app.ai_processor
+```
+
+Run the daily briefing generator manually:
+
+```bash
+python -m app.briefing_processor
+```
+
 Run the FastAPI app:
 
 ```bash
@@ -1278,28 +1546,18 @@ Read recent logs:
 tail -n 40 logs/newswatch.log
 ```
 
-Check systemd timer:
+Check systemd timers:
 
 ```bash
-systemctl --user status newswatch-collector.timer
-```
-
-Check systemd service:
-
-```bash
-systemctl --user status newswatch-collector.service
-```
-
-List NewsWatch timers:
-
-```bash
-systemctl --user list-timers --all | grep newswatch
+systemctl --user list-timers | grep newswatch
 ```
 
 Read systemd service logs:
 
 ```bash
 journalctl --user -u newswatch-collector.service -n 60 --no-pager
+journalctl --user -u newswatch-ai-processor.service -n 60 --no-pager
+journalctl --user -u newswatch-briefing.service -n 60 --no-pager
 ```
 
 Check Git status:
@@ -1338,11 +1596,17 @@ __pycache__/
 # Local database
 news.db
 
+# Database backups
+news.db.backup-*
+
 # Logs
 logs/*.log
 
 # Runtime lock file
 newswatch.lock
+
+# Environment variables (API keys, secrets)
+.env
 
 # Editor/system files
 .vscode/
@@ -1356,7 +1620,9 @@ Reason:
 - `*.pyc` files are compiled Python artifacts
 - `logs/*.log` is runtime output
 - `news.db` is a local database file
+- `news.db.backup-*` are local backups created before risky operations
 - `newswatch.lock` is a temporary runtime lock
+- `.env` contains the Anthropic API key and other secrets
 - `.vscode/` is local editor configuration
 
 ---
@@ -1496,8 +1762,6 @@ Completed
 
 ### Phase 6E — JavaScript Improvements
 
-Completed features:
-
 - Load `static/app.js` in the browser
 - Capture the reload form submit event
 - Prevent the default form reload with `event.preventDefault()`
@@ -1519,8 +1783,6 @@ Completed
 
 ### Phase 7 — Automatic Background Collection
 
-Completed features:
-
 - Create a `systemd` user service for collector execution
 - Create a `systemd` user timer for scheduled collection
 - Run the RSS collector automatically in the background
@@ -1539,32 +1801,86 @@ Completed
 
 ---
 
-### Phase 8 — Public News Platform Interface
+### Phase 8A — World Brief and Brazil Brief
 
-Planned features:
-
-- Rework the current dashboard into a public-facing news platform interface
-- Separate public reading pages from internal/admin status views
-- Add topic-based navigation
-- Improve article cards for reading experience
-- Add sections such as Latest News, Top Stories, Brazil, World, Economy, Technology, and Security
-- Prepare the interface for future AI summaries and context blocks
+- Add a World Brief block filtered by foreign sources
+- Add a Brazil Brief block filtered by Brazilian sources
+- Render both blocks in the dashboard
+- Avoid overlap between the two blocks
 
 Status:
 
 ```text
-Planned
+Completed
 ```
 
 ---
 
-### Phase 9 — Topic Grouping
+### Phase 8B — Classifier Refinement
+
+- Rewrite the classifier with whole-word matching using regex word boundaries
+- Add English keywords alongside Portuguese
+- Remove ambiguous short keywords that caused false positives
+- Apply explicit priority order to break category ties
+- Stop using the `source` field in the matched text to avoid bias
+- Reclassify all existing articles in the database
+
+Status:
+
+```text
+Completed
+```
+
+---
+
+### Phase 8C — AI Integration
+
+- Add Anthropic API key configuration via `.env` and `python-dotenv`
+- Add `app/ai.py` with article summary and daily briefing generation
+- Add `ai_summary` and `ai_summary_at` columns to the `articles` table
+- Add `daily_briefings` table to store generated briefings
+- Add `app/ai_processor.py` for batch processing of pending articles
+- Add `app/briefing_processor.py` for daily briefing generation
+- Add a `systemd` timer for the AI processor (every 15 minutes)
+- Add a `systemd` timer for the daily briefing (every 2 hours)
+- Apply a per-run safety limit on the AI processor to keep cost predictable
+- Skip articles outside the relevant categories
+- Adapt summary length to category priority
+
+Status:
+
+```text
+Completed
+```
+
+---
+
+### Phase 9 — Public-facing Layout Redesign
 
 Planned features:
 
-- Detect articles covering the same topic
-- Group related articles from multiple sources
-- Create topic pages
+- Redesign the home interface as an intelligence-platform layout
+- Make the Daily Briefing the visual hero of the page
+- Place World Brief and Brazil Brief as scannable side columns
+- Move the live source feed below, with category-coded icons
+- Apply a dark, technical aesthetic with serif-on-monospace typography contrast
+- Add an atmospheric background layer (corner brackets, vertical rules, particle texture, indexed identifiers)
+- Introduce a brand mark based on a "mission board" metaphor
+
+Status:
+
+```text
+In progress
+```
+
+---
+
+### Phase 10 — Topic Grouping
+
+Planned features:
+
+- Detect articles covering the same topic across sources
+- Group related articles in topic pages
 - Show source coverage for each topic
 - Prepare topic groups for AI interpretation
 
@@ -1576,17 +1892,15 @@ Planned
 
 ---
 
-### Phase 10 — AI Summaries and Interpretation
+### Phase 11 — Deeper AI Interpretation
 
 Planned features:
 
-- Generate AI summaries for articles or topics
-- Extract key points
-- Explain why an article or topic matters
-- Add context and possible implications
-- Store generated summaries in SQLite or PostgreSQL
-- Avoid copying full articles without permission
-- Preserve original source links and attribution
+- AI-generated key points per article
+- AI-generated context per article
+- AI-generated "why this matters" explanations
+- AI-assisted reclassification of existing articles
+- Source comparison when multiple sources cover the same topic
 
 Status:
 
@@ -1596,14 +1910,14 @@ Planned
 
 ---
 
-### Phase 11 — Automation and Notifications
+### Phase 12 — Automation and Notifications
 
 Planned features:
 
 - Telegram alerts
 - Discord alerts
 - Email reports
-- Daily summaries
+- Daily summaries delivered to external channels
 - n8n automation integration
 - Google Sheets export
 
@@ -1615,7 +1929,7 @@ Planned
 
 ---
 
-### Phase 12 — Production Planning
+### Phase 13 — Production Planning
 
 Planned features:
 
@@ -1627,6 +1941,7 @@ Planned features:
 - Add backups
 - Add monitoring
 - Separate public interface from admin/status area
+- Apply rate limiting on the AI processor and on public endpoints
 
 Status:
 
@@ -1640,7 +1955,7 @@ Planned
 
 This project prioritizes RSS feeds and public metadata.
 
-The collector should avoid:
+The collector avoids:
 
 - Copying full articles without permission
 - Bypassing paywalls
@@ -1648,7 +1963,7 @@ The collector should avoid:
 - Sending excessive requests to websites
 - Republishing restricted images or copyrighted content without permission
 
-The recommended approach is to store:
+The project stores:
 
 - Title
 - Source
@@ -1656,13 +1971,11 @@ The recommended approach is to store:
 - Published date
 - Short RSS summary when available
 - Image URL when provided by the feed
-- Original source link
+- AI-generated summary derived only from the title and RSS summary
 
 Full article extraction should only be added for sources that clearly allow it.
 
-AI summaries should be used as a transformative interpretation layer and should not replace the original article.
-
-The original source link should always remain visible.
+AI summaries are used as a transformative interpretation layer. They are generated from limited metadata (title plus short RSS summary) and never from the full article body, so they do not redistribute source content. The original source link should always remain visible.
 
 ---
 
@@ -1678,9 +1991,10 @@ This project is intended for:
 - HTML/CSS practice
 - JavaScript practice
 - Logging practice
+- API integration practice (Anthropic API)
+- Prompt design practice
 - Infrastructure portfolio development
 - Future deployment practice
 - Future automation practice
-- Future AI integration practice
 
-NewsWatch Bot is not just a script. It is being developed as a centralized news platform that demonstrates automation, data persistence, modular design, background collection, search functionality, API usage, JavaScript interaction, execution history, and future AI-powered news interpretation.
+NewsWatch Bot is not just a script. It is being developed as a centralized news intelligence platform that demonstrates automation, data persistence, modular design, background collection, search functionality, API usage, JavaScript interaction, execution history, AI-powered news interpretation, and infrastructure design for future deployment.
