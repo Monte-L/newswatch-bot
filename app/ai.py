@@ -82,19 +82,43 @@ def generate_article_summary(title, summary, category):
     
 DAILY_BRIEFING_PROMPT = """Você é um analista sênior de inteligência de notícias. Sua tarefa é produzir o briefing diário do dia, em português, baseado nos resumos dos artigos fornecidos abaixo.
 
-Estrutura obrigatória do briefing:
+Formato de saída obrigatório:
 
-**Cenário geral:** 2 linhas que sintetizam o tom geral do dia.
-**Mundo:** 3 a 4 linhas conectando os principais fios geopolíticos e econômicos internacionais. Identifique padrões e relações entre eventos quando existirem.
-**Brasil:** 3 a 4 linhas com os principais movimentos da política, economia e segurança no país.
-**Por que importa hoje:** 2 linhas explicando o que torna esse dia significativo, ou o que observar a seguir.
+Você deve responder APENAS com as 4 seções abaixo, cada uma começando com um marcador específico em UMA linha própria. Use exatamente estes 4 marcadores, nesta ordem:
 
-Diretrizes:
-- Tom factual com análise leve. Você pode conectar pontos e identificar tendências, mas evite opinião editorial.
+[CENARIO]
+[parágrafo único de 4 a 5 linhas que sintetiza o tom geral do dia e conecta os principais fios narrativos. Este é o bloco de análise principal — pode incluir contexto, leitura geopolítica leve e identificação de tendências. Prosa corrida, sem listas.]
+
+[MUNDO]
+- [ponto-chave 1 em 1 a 2 linhas curtas]
+- [ponto-chave 2 em 1 a 2 linhas curtas]
+- [ponto-chave 3 em 1 a 2 linhas curtas]
+
+[BRASIL]
+- [ponto-chave 1 em 1 a 2 linhas curtas]
+- [ponto-chave 2 em 1 a 2 linhas curtas]
+- [ponto-chave 3 em 1 a 2 linhas curtas]
+
+[POR_QUE_IMPORTA]
+- [implicação 1 em 1 a 2 linhas curtas]
+- [implicação 2 em 1 a 2 linhas curtas]
+- [implicação 3 em 1 a 2 linhas curtas]
+
+Regras inegociáveis sobre o formato:
+- MUNDO, BRASIL e POR_QUE_IMPORTA devem ter EXATAMENTE 3 bullets cada. Não 2, não 4, não 5. Sempre 3.
+- Se houver mais matéria-prima do que cabe em 3 bullets, escolha os 3 mais relevantes e descarte o resto.
+- Se houver menos matéria-prima, faça apenas 1 ou 2 bullets em vez de inflar.
+- Cada bullet começa com hífen "-" seguido de um espaço.
+- Cada bullet deve caber em 1 a 2 linhas curtas. Nunca passe de 2 linhas por bullet.
+
+Outras diretrizes:
+- Bullets devem ser pontos-chave concretos e específicos, não generalidades.
+- Não repita no MUNDO/BRASIL o que já está no CENARIO. CENARIO é a leitura analítica; os outros são destaques escaneáveis.
+- NUNCA use markdown (sem **, sem #).
+- NUNCA adicione título no topo (sem "Briefing Diário", sem data).
+- NUNCA adicione introdução antes do primeiro [CENARIO].
+- Tom factual com análise leve no CENARIO. Pontos secos e diretos nos bullets.
 - Não invente fatos que não estão nos artigos.
-- Se uma seção não tiver matéria-prima suficiente, escreva uma linha curta reconhecendo isso ("Pouca movimentação relevante no Brasil hoje.") em vez de inflar.
-- Não use listas com bullets. Texto corrido em cada seção.
-- Mantenha cada seção no tamanho indicado.
 
 Artigos do dia:
 
@@ -134,7 +158,7 @@ def generate_daily_briefing(articles):
     try:
         response = client.messages.create(
             model=MODEL,
-            max_tokens=600,
+            max_tokens=900,
             messages=[
                 {"role": "user", "content": prompt},
             ],

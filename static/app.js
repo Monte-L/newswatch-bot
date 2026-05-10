@@ -1,3 +1,19 @@
+const SCROLL_KEY = "newswatch_scroll_y";
+
+window.addEventListener("DOMContentLoaded", () => {
+  const savedY = sessionStorage.getItem(SCROLL_KEY);
+  if (savedY !== null) {
+    window.scrollTo(0, parseInt(savedY, 10));
+    sessionStorage.removeItem(SCROLL_KEY);
+  }
+});
+
+document.addEventListener("submit", (event) => {
+  if (event.target.classList.contains("feed-filters")) {
+    sessionStorage.setItem(SCROLL_KEY, window.scrollY);
+  }
+});
+
 console.log("NewsWatch JavaScript loaded.");
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -8,7 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
     }
 
-    const reloadButton = reloadForm.querySelector(".reload-button");
+    const reloadButton = reloadForm.querySelector(".feed-reload-btn");
     const reloadMessage = document.querySelector("#reload-message");
 
     console.log("Reload form found");

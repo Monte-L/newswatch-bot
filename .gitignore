@@ -24,3 +24,6 @@ newswatch.lock
 
 # Database backups
 news.db.backup-*
+# Backup files
+*.backup
+*~

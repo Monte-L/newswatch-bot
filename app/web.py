@@ -16,6 +16,7 @@ from app.queries import (
     get_article_counts,
     get_brazil_brief_articles,
     get_categories,
+    get_latest_briefing,
     get_recent_articles,
     get_sources,
     get_world_brief_articles,
@@ -55,6 +56,7 @@ def dashboard(
     
     world_brief_articles = get_world_brief_articles()
     brazil_brief_articles = get_brazil_brief_articles()
+    latest_briefing = get_latest_briefing()
 
     return templates.TemplateResponse(
         request=request,
@@ -66,6 +68,7 @@ def dashboard(
             "counts": counts,
             "world_brief_articles": world_brief_articles,
             "brazil_brief_articles": brazil_brief_articles,
+            "latest_briefing": latest_briefing,
             "selected_category": category,
             "selected_source": source,
             "search_query": q,

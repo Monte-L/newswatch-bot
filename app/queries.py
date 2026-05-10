@@ -59,22 +59,25 @@ def get_recent_articles(
     if search:
         query += """
             AND (
-                title LIKE ?
-                OR summary LIKE ?
+                title LIKE ? OR title LIKE ? OR title LIKE ? OR title LIKE ?
+                OR summary LIKE ? OR summary LIKE ? OR summary LIKE ? OR summary LIKE ?
                 OR source LIKE ?
                 OR category LIKE ?
             )
         """
 
-        search_pattern = f"%{search}%"
-        params.extend(
-            [
-                search_pattern,
-                search_pattern,
-                search_pattern,
-                search_pattern,
-            ]
-        )
+        params.extend([
+            f"{search} %",
+            f"% {search}",
+            f"% {search} %",
+            search,
+            f"{search} %",
+            f"% {search}",
+            f"% {search} %",
+            search,
+            search,
+            search,
+        ])
 
     query += """ 
         ORDER BY fetched_at DESC 
@@ -331,3 +334,104 @@ def get_article_by_id(article_id: str):
         return None
 
     return dict(article)
+
+def _parse_briefing_content(content):
+    """
+    Parse the briefing content into structured sections.
+
+    Cenário is kept as a single paragraph string.
+    Mundo, Brasil and Por que importa are returned as lists of bullet points
+    (lines starting with "- ").
+
+    Returns a dict with keys: cenario (str), mundo (list), brasil (list),
+    por_que_importa (list).
+    """
+    raw_sections = {
+        "cenario": "",
+        "mundo": "",
+        "brasil": "",
+        "por_que_importa": "",
+    }
+
+    marker_to_key = {
+        "[CENARIO]": "cenario",
+        "[MUNDO]": "mundo",
+        "[BRASIL]": "brasil",
+        "[POR_QUE_IMPORTA]": "por_que_importa",
+    }
+
+    current_key = None
+    buffer = []
+
+    for line in content.splitlines():
+        stripped = line.strip()
+
+        if stripped in marker_to_key:
+            if current_key is not None:
+                raw_sections[current_key] = "\n".join(buffer).strip()
+            current_key = marker_to_key[stripped]
+            buffer = []
+        else:
+            if current_key is not None:
+                buffer.append(line)
+
+    if current_key is not None:
+        raw_sections[current_key] = "\n".join(buffer).strip()
+
+    bullet_keys = {"mundo", "brasil", "por_que_importa"}
+    sections = {}
+    for key, text in raw_sections.items():
+        if key in bullet_keys:
+            bullets = []
+            for line in text.splitlines():
+                stripped = line.strip()
+                if stripped.startswith("- "):
+                    bullets.append(stripped[2:].strip())
+                elif stripped.startswith("-"):
+                    bullets.append(stripped[1:].strip())
+            sections[key] = bullets
+        else:
+            sections[key] = text
+
+    return sections
+
+
+def get_latest_briefing():
+    """
+    Return the most recent daily briefing with parsed sections.
+
+    Returns a dict with the briefing fields plus a 'sections' key containing
+    cenario, mundo, brasil, and por_que_importa.
+
+    Returns None if no briefing exists yet.
+    """
+    connection = get_connection()
+    cursor = connection.cursor()
+
+    cursor.execute(
+        """
+        SELECT
+            id,
+            generated_at,
+            content,
+            articles_considered,
+            input_tokens,
+            output_tokens,
+            model_used
+        FROM daily_briefings
+        ORDER BY id DESC
+        LIMIT 1
+        """
+    )
+
+    briefing = cursor.fetchone()
+
+    connection.close()
+
+    if briefing is None:
+        return None
+
+    briefing_dict = dict(briefing)
+    briefing_dict["sections"] = _parse_briefing_content(briefing_dict["content"])
+
+    return briefing_dict

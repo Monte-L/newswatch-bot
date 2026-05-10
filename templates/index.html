@@ -1,189 +1,331 @@
-<!DOCTYPE html>
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>NewsWatch — News Intel Desk</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet"
+    />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css" />
+    <link rel="stylesheet" href="/static/style.css?v=4" />
+  </head>
 
-<html lang="en">
+  <body>
+    <div class="ambient" aria-hidden="true">
+      <svg class="ambient-particles" preserveAspectRatio="none" viewBox="0 0 100 100">
+        <g fill="#5DCAA5">
+          <circle cx="12" cy="22" r="0.15" />
+          <circle cx="28" cy="38" r="0.1" />
+          <circle cx="55" cy="14" r="0.18" />
+          <circle cx="71" cy="48" r="0.12" />
+          <circle cx="89" cy="29" r="0.15" />
+          <circle cx="42" cy="62" r="0.1" />
+          <circle cx="18" cy="78" r="0.14" />
+          <circle cx="63" cy="84" r="0.12" />
+          <circle cx="84" cy="71" r="0.15" />
+          <circle cx="9" cy="55" r="0.11" />
+          <circle cx="36" cy="91" r="0.14" />
+          <circle cx="76" cy="9" r="0.12" />
+        </g>
+      </svg>
 
-<head>
-    <meta charset="UTF-8">
-    <title>NewsWatch Bot</title>
-    <link rel="stylesheet" href="/static/style.css?v=2">
-</head>
+      <div class="vertical-rule" style="left: 18%;"></div>
+      <div class="vertical-rule" style="right: 22%;"></div>
 
-<body>
+      <span class="side-text side-text-left">SECTOR · 02</span>
+      <span class="side-text side-text-right">CH · NEWSWATCH</span>
+
+      <svg class="corner-mark corner-tl" width="20" height="20" viewBox="0 0 20 20">
+        <path d="M0 7 L0 0 L7 0" stroke="#5DCAA5" stroke-width="1" fill="none" />
+      </svg>
+      <svg class="corner-mark corner-tr" width="20" height="20" viewBox="0 0 20 20">
+        <path d="M13 0 L20 0 L20 7" stroke="#5DCAA5" stroke-width="1" fill="none" />
+      </svg>
+      <svg class="corner-mark corner-bl" width="20" height="20" viewBox="0 0 20 20">
+        <path d="M0 13 L0 20 L7 20" stroke="#5DCAA5" stroke-width="1" fill="none" />
+      </svg>
+      <svg class="corner-mark corner-br" width="20" height="20" viewBox="0 0 20 20">
+        <path d="M13 20 L20 20 L20 13" stroke="#5DCAA5" stroke-width="1" fill="none" />
+      </svg>
+    </div>
+
     <header class="topbar">
-        <div class="topbar-content">
-            <h1>NewsWatch Bot</h1>
-            <p>Centralized news intelligence from multiple sources</p>
+      <div class="logo">
+        <svg class="logo-mark" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+          <line x1="16" y1="2" x2="16" y2="6" stroke="#5DCAA5" stroke-width="0.6" />
+          <circle cx="16" cy="2.5" r="1" fill="#5DCAA5" />
+          <rect x="3" y="6" width="26" height="22" fill="#0F1620" stroke="#5DCAA5" stroke-width="1" />
+          <line x1="3" y1="6" x2="29" y2="6" stroke="#5DCAA5" stroke-width="0.4" opacity="0.6" />
+          <line x1="3" y1="13" x2="29" y2="13" stroke="#5DCAA5" stroke-width="0.3" opacity="0.4" />
+          <line x1="3" y1="21" x2="29" y2="21" stroke="#5DCAA5" stroke-width="0.3" opacity="0.4" />
+          <rect x="6" y="9" width="9" height="7" fill="none" stroke="#5DCAA5" stroke-width="0.7" />
+          <rect x="17" y="9" width="9" height="7" fill="none" stroke="#5DCAA5" stroke-width="0.7" />
+          <rect x="6" y="18" width="20" height="7" fill="none" stroke="#5DCAA5" stroke-width="0.7" />
+          <circle cx="6" cy="9" r="0.6" fill="#5DCAA5" />
+          <circle cx="15" cy="9" r="0.6" fill="#5DCAA5" />
+          <circle cx="17" cy="9" r="0.6" fill="#5DCAA5" />
+          <circle cx="26" cy="9" r="0.6" fill="#5DCAA5" />
+          <circle cx="6" cy="18" r="0.6" fill="#5DCAA5" />
+          <circle cx="26" cy="18" r="0.6" fill="#5DCAA5" />
+        </svg>
+        <div class="logo-text-wrap">
+          <span class="logo-text">NEWSWATCH</span>
+          <span class="logo-tag">NEWS INTEL DESK</span>
         </div>
+      </div>
+
+     <div class="status-bar">
+        <div class="stat">
+            <span class="stat-label">FONTES ATIVAS</span>
+            <span class="stat-val">{{ counts.total_sources }}</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">ARTIGOS · 24H</span>
+            <span class="stat-val">{{ counts.total_articles }}</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">CATEGORIAS</span>
+            <span class="stat-val">{{ counts.total_categories }}</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">VOLUME · 24H</span>
+            <div class="sparkline">
+                <span style="height: 30%"></span>
+                <span style="height: 50%"></span>
+                <span style="height: 35%"></span>
+                <span style="height: 70%"></span>
+                <span style="height: 55%"></span>
+                <span style="height: 85%"></span>
+                <span style="height: 60%"></span>
+                <span style="height: 95%"></span>
+                <span style="height: 75%"></span>
+                <span style="height: 100%"></span>
+            </div>
+        </div>
+    </div>
     </header>
 
     <main class="container">
-        <section class="briefing-grid">
-            <article class="brief-card side-brief">
-                <span class="eyebrow">World Brief</span>
-                <h2>Global signals</h2>
-                <p>
-                    International headlines and geopolitical updates collected from multiple
-                    trusted RSS sources.
-                </p>
-
-                {% if world_brief_articles %}
-                    <ul class="brief-list">
-                        {% for article in world_brief_articles %}
-                            <li>
-                                <a href="/articles/{{ article.id }}">
-                                    {{ article.title }}
-                                </a>
-                            </li>
-                        {% endfor %}
-                    </ul>
-                {% else %}
-                    <p class="brief-empty">
-                        No international articles available yet.
-                    </p>
+      <section class="briefing-grid">
+        <article class="hero-brief">
+            <div class="hero-top">
+                <span class="hero-label">
+                    <span class="hero-label-icon">✦</span>DAILY BRIEFING
+                </span>
+                {% if latest_briefing %}
+                    <span class="hero-meta">
+                        {{ latest_briefing.articles_considered }} ARTIGOS · {{ latest_briefing.generated_at[11:16] }} UTC
+                    </span>
                 {% endif %}
-            </article>
+            </div>
 
-            <article class="brief-card main-brief">
-                <span class="eyebrow">Daily AI Briefing</span>
-                <h2>Today’s intelligence briefing</h2>
-                <p>
-                    A compact briefing layer designed to summarize the most relevant stories,
-                    extract key points, and explain why they matter.
-                </p>
+        {% if latest_briefing %}
+            <h1 class="hero-title">Briefing diário</h1>
 
-                <div class="brief-status">
-                    AI briefing layer in development.
+            <div class="hero-sections">
+                <div class="hero-section hero-section-featured">
+                    <div class="hero-section-icon hero-section-icon-cyan"><i class="ti ti-eye"></i></div>
+                    <div class="hero-section-body">
+                    <div class="hero-section-label">CENÁRIO GERAL</div>
+                    <p class="hero-section-text">{{ latest_briefing.sections.cenario }}</p>
+                    </div>
                 </div>
-            </article>
 
-            <article class="brief-card side-brief">
-                <span class="eyebrow">Brazil Brief</span>
-                <h2>Brazil watch</h2>
-                <p>
-                    Brazilian politics, economy, security, and public affairs collected from
-                    national sources.
-                </p>
-
-                {% if brazil_brief_articles %}
-                    <ul class="brief-list">
-                        {% for article in brazil_brief_articles %}
-                            <li>
-                                <a href="/articles/{{ article.id }}">
-                                    {{ article.title }}
-                                </a>
-                            </li>
+                <div class="hero-sections-grid">
+                    <div class="hero-section hero-section-compact">
+                    <div class="hero-section-header">
+                        <div class="hero-section-icon hero-section-icon-cyan"><i class="ti ti-world"></i></div>
+                        <div class="hero-section-label">MUNDO</div>
+                    </div>
+                    <ul class="hero-section-bullets">
+                        {% for bullet in latest_briefing.sections.mundo %}
+                            <li>{{ bullet }}</li>
                         {% endfor %}
                     </ul>
-                {% else %}
-                    <p class="brief-empty">
-                        No Brazilian articles available yet.
-                    </p>
-                {% endif %}
-            </article>
-        </section>
-
-        <section class="filters">
-            <div class="toolbar">
-                <form method="get" action="/" class="filter-form">
-                    <div class="filter-field">
-                        <label for="q">Search</label>
-                        <input type="text" name="q" id="q" value="{{ search_query or '' }}"
-                            placeholder="Search news, sources, or topics....">
                     </div>
 
-                    <div class="filter-field">
-                        <label for="category">Category</label>
-                        <select name="category" id="category">
-                            <option value="">All categories</option>
-                            {% for category in categories %}
-                            <option value="{{ category }}" {% if selected_category==category %}selected{% endif %}>
-                                {{ category }}
-                            </option>
+                    <div class="hero-section hero-section-compact">
+                    <div class="hero-section-header">
+                        <div class="hero-section-icon hero-section-icon-amber"><i class="ti ti-flag"></i></div>
+                        <div class="hero-section-label">BRASIL</div>
+                    </div>
+                    <ul class="hero-section-bullets">
+                        {% for bullet in latest_briefing.sections.brasil %}
+                            <li>{{ bullet }}</li>
+                        {% endfor %}
+                    </ul>
+                    </div>
+
+                    <div class="hero-section hero-section-compact">
+                    <div class="hero-section-header">
+                        <div class="hero-section-icon hero-section-icon-purple"><i class="ti ti-bulb"></i></div>
+                        <div class="hero-section-label">POR QUE IMPORTA HOJE</div>
+                    </div>
+                        <ul class="hero-section-bullets">
+                            {% for bullet in latest_briefing.sections.por_que_importa %}
+                                <li>{{ bullet }}</li>
                             {% endfor %}
-                        </select>
+                        </ul>
                     </div>
-
-                    <div class="filter-field">
-                        <label for="source">Source</label>
-                        <select name="source" id="source">
-                            <option value="">All sources</option>
-                            {% for source in sources %}
-                            <option value="{{ source }}" {% if selected_source==source %}selected{% endif %}>
-                                {{ source }}
-                            </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-
-                    <div class="filter-actions">
-                        <button class="apply-button" type="submit">Apply filters</button>
-                        <a class="clear-link" href="/">Clear</a>
-                    </div>
-                </form>
-
-                <form method="post" action="/reload" class="reload-form" id="reload-form">
-                    <button type="submit" class="reload-button">Reload News</button>
-                </form>
+                </div>
             </div>
-        </section>
-
-        <div id="reload-message" class="reload-message" hidden></div>
-
-        {% if reloaded %}
-        <div class="reload-message">Reload completed. News articles saved: {{ new_articles }}</div>
+        {% else %}
+            <h1 class="hero-title">Briefing em preparação</h1>
+            <p class="hero-empty">
+                Nenhum briefing foi gerado ainda. O sistema gera um briefing
+                consolidado a cada 2 horas com base nos artigos relevantes
+                das últimas 24 horas.
+            </p>
         {% endif %}
+        </article>
 
-        <div class="section-heading">
-            <div>
-                <span class="eyebrow">Live source feed</span>
-                <h2>Source Feed</h2>
+        <aside class="side-briefs">
+          <section class="side-brief side-brief-world">
+            <div class="side-brief-head">
+              <span class="side-brief-title">
+                <span class="side-brief-icon">◊</span>WORLD BRIEF
+              </span>
+              <span class="side-brief-count">
+                {{ world_brief_articles|length }} LIVE
+              </span>
             </div>
+
+            {% if world_brief_articles %}
+              <ol class="side-brief-list">
+                {% for article in world_brief_articles %}
+                  <li>
+                    <a href="/articles/{{ article.id }}">
+                      <span class="side-brief-num">{{ '%02d' % loop.index }}</span>
+                      <span class="side-brief-text">{{ article.title }}</span>
+                    </a>
+                  </li>
+                {% endfor %}
+              </ol>
+            {% else %}
+              <p class="side-brief-empty">No international articles yet.</p>
+            {% endif %}
+          </section>
+
+          <section class="side-brief side-brief-brazil">
+            <div class="side-brief-head">
+              <span class="side-brief-title">
+                <span class="side-brief-icon">◊</span>BRAZIL BRIEF
+              </span>
+              <span class="side-brief-count">
+                {{ brazil_brief_articles|length }} LIVE
+              </span>
+            </div>
+
+            {% if brazil_brief_articles %}
+              <ol class="side-brief-list">
+                {% for article in brazil_brief_articles %}
+                  <li>
+                    <a href="/articles/{{ article.id }}">
+                      <span class="side-brief-num">{{ '%02d' % loop.index }}</span>
+                      <span class="side-brief-text">{{ article.title }}</span>
+                    </a>
+                  </li>
+                {% endfor %}
+              </ol>
+            {% else %}
+              <p class="side-brief-empty">No Brazilian articles yet.</p>
+            {% endif %}
+          </section>
+        </aside>
+      </section>
+
+      <section class="feed-bar">
+        <div class="feed-bar-left">
+          <span class="feed-bar-label">
+            <span class="feed-bar-icon">▶</span>SOURCE FEED · LIVE
+          </span>
         </div>
 
-        <section class="articles">
-            {% if articles %}
-            {% for article in articles %}
-            <article class="article-card">
-                {% if article.image_url %}
-                <img class="article-image" src="{{ article.image_url }}" alt="Article image">
-                {% endif %}
+        <form method="get" action="/" class="feed-filters">
+          <input
+            type="text"
+            name="q"
+            value="{{ search_query or '' }}"
+            placeholder="Search news, sources, or topics..."
+            class="feed-search"
+          />
 
-                <div class="article-content">
-                    <div class="article-meta">
-                        <span>{{ article.source }}</span>
-                        <span>{{ article.category }}</span>
-                    </div>
-
-                    <h2>{{ article.title }}</h2>
-
-                    {% if article.summary %}
-                    <p>{{ article.summary }}</p>
-                    {% else %}
-                    <p class="muted">No summary available from RSS feed.</p>
-                    {% endif %}
-
-                    <div class="article-footer">
-                        <span>{{ article.published }}</span>
-
-                        <div class="article-actions">
-                            <a href="/articles/{{ article.id }}">
-                                Read preview
-                            </a>
-
-                            <a href="{{ article.link }}" target="_blank" rel="noopener noreferrer">
-                                Open original
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </article>
+          <select name="category" class="feed-select">
+            <option value="">All categories</option>
+            {% for category in categories %}
+              <option value="{{ category }}" {% if selected_category == category %}selected{% endif %}>
+                {{ category }}
+              </option>
             {% endfor %}
-            {% else %}
-            <p class="empty-state">No articles found for the selected filters.</p>
-            {% endif %}
-        </section>
-    </main>
-    <script src="/static/app.js"></script>
-</body>
+          </select>
 
+          <select name="source" class="feed-select">
+            <option value="">All sources</option>
+            {% for source in sources %}
+              <option value="{{ source }}" {% if selected_source == source %}selected{% endif %}>
+                {{ source }}
+              </option>
+            {% endfor %}
+          </select>
+
+          <button class="feed-apply" type="submit">Apply</button>
+          <a class="feed-clear" href="/">Clear</a>
+        </form>
+
+        <form method="post" action="/reload" class="feed-reload" id="reload-form">
+          <button type="submit" class="feed-reload-btn">Reload</button>
+        </form>
+      </section>
+
+      <div id="reload-message" class="reload-message" hidden></div>
+
+      {% if reloaded %}
+        <div class="reload-message">
+          Reload completed. New articles: {{ new_articles }}
+        </div>
+      {% endif %}
+
+      <section class="source-feed">
+        {% if articles %}
+          {% for article in articles %}
+            <article class="feed-row">
+              <span class="feed-time">{{ article.fetched_at[11:16] }}</span>
+                <span class="feed-cat-icon feed-cat-{{ article.category|lower }}">
+                    {% if article.category == "Politics" %}<i class="ti ti-flag"></i>
+                    {% elif article.category == "Economy" %}<i class="ti ti-trending-up"></i>
+                    {% elif article.category == "Security" %}<i class="ti ti-shield"></i>
+                    {% elif article.category == "International" %}<i class="ti ti-world"></i>
+                    {% elif article.category == "Health" %}<i class="ti ti-stethoscope"></i>
+                    {% elif article.category == "Sports" %}<i class="ti ti-ball-football"></i>
+                    {% elif article.category == "Technology" %}<i class="ti ti-cpu"></i>
+                    {% elif article.category == "Environment" %}<i class="ti ti-leaf"></i>
+                    {% else %}<i class="ti ti-news"></i>
+                    {% endif %}
+                </span>
+              <div class="feed-body">
+                <a href="/articles/{{ article.id }}" class="feed-title">
+                  {{ article.title }}
+                </a>
+                {% if article.ai_summary %}
+                  <p class="feed-summary">{{ article.ai_summary }}</p>
+                {% endif %}
+              </div>
+              <span class="feed-source">{{ article.source }}</span>
+              <span class="feed-cat feed-cat-{{ article.category|lower }}">
+                {{ article.category|upper }}
+              </span>
+            </article>
+          {% endfor %}
+        {% else %}
+          <p class="feed-empty">No articles found for the selected filters.</p>
+        {% endif %}
+      </section>
+    </main>
+
+    <script src="/static/app.js"></script>
+  </body>
 </html>
