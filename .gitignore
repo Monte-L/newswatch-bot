@@ -18,3 +18,9 @@ logs/*.log
 
 # Runtime lock file
 newswatch.lock
+
+# Environment variables (API keys, secrets)
+.env
+
+# Database backups
+news.db.backup-*

@@ -201,6 +201,102 @@ def get_latest_collector_run():
     
     return dict(collector_run)
 
+WORLD_SOURCES = [
+    "BBC News",
+    "Business | The Guardian",
+    "Deutsche Welle",
+    "Deutsche Welle: DW.com - Europe",
+    "Environment | The Guardian",
+    "France 24 - International breaking news, top stories and headlines",
+    "News | Euronews RSS",
+    "NYT > Business",
+    "NYT > Science",
+    "NYT > Technology",
+    "NYT > World News",
+    "Technology | The Guardian",
+    "World news | The Guardian",
+    "World | Deutsche Welle",
+]
+
+
+def get_world_brief_articles(limit: int = 5):
+    """
+    Return recent articles from international sources for the World Brief section.
+    """
+
+    connection = get_connection()
+    cursor = connection.cursor()
+
+    placeholders = ",".join("?" * len(WORLD_SOURCES))
+
+    cursor.execute(
+        f"""
+        SELECT
+            id,
+            title,
+            source,
+            category,
+            published,
+            fetched_at
+        FROM articles
+        WHERE source IN ({placeholders})
+        ORDER BY fetched_at DESC
+        LIMIT ?
+        """,
+        (*WORLD_SOURCES, limit),
+    )
+
+    articles = cursor.fetchall()
+
+    connection.close()
+
+    return [dict(article) for article in articles]
+    
+
+BRAZIL_SOURCES = [
+    "Agência Pública",
+    "CNN Brasil",
+    "Feed Últimas",
+    "Folha de S.Paulo - Em cima da hora - Principal",
+    "Intercept Brasil",
+    "UOL Noticias",
+]
+
+
+def get_brazil_brief_articles(limit: int = 5):
+    """
+    Return recent Brazilian articles for the Brazil Brief section.
+    """
+
+    connection = get_connection()
+    cursor = connection.cursor()
+
+    placeholders = ",".join("?" * len(BRAZIL_SOURCES))
+
+    cursor.execute(
+        f"""
+        SELECT
+            id,
+            title,
+            source,
+            category,
+            published,
+            fetched_at
+        FROM articles
+        WHERE source IN ({placeholders})
+        ORDER BY fetched_at DESC
+        LIMIT ?
+        """,
+        (*BRAZIL_SOURCES, limit),
+    )
+
+    articles = cursor.fetchall()
+
+    connection.close()
+
+    return [dict(article) for article in articles]
+
+
 def get_article_by_id(article_id: str):
     """
     Return a single article by its ID.

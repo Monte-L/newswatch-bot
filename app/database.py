@@ -40,6 +40,18 @@ def create_database():
             )
         """)
     
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS daily_briefings (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            generated_at TEXT NOT NULL,
+            content TEXT NOT NULL,
+            articles_considered INTEGER NOT NULL,
+            input_tokens INTEGER,
+            output_tokens INTEGER,
+            model_used TEXT
+            )
+        """)
+    
     migrate_database(cursor)
 
     connection.commit()
@@ -58,9 +70,11 @@ def migrate_database(cursor):
     existing_columns = {column[1] for column in cursor.fetchall()}
 
     required_columns = {
-        "category": "TEXT",
-        "summary": "TEXT",
-        "image_url": "TEXT",
+    "category": "TEXT",
+    "summary": "TEXT",
+    "image_url": "TEXT",
+    "ai_summary": "TEXT",
+    "ai_summary_at": "TEXT",
     }
 
     for column_name, column_type in required_columns.items():

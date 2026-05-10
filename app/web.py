@@ -14,9 +14,11 @@ from app.database import create_database, finish_collector_run, start_collector_
 from app.queries import (
     get_article_by_id,
     get_article_counts,
+    get_brazil_brief_articles,
     get_categories,
     get_recent_articles,
     get_sources,
+    get_world_brief_articles,
 )
 
 app = FastAPI(title="NewsWatch Bot Dashboard")
@@ -50,6 +52,9 @@ def dashboard(
     categories = get_categories()
     sources = get_sources()
     counts = get_article_counts()
+    
+    world_brief_articles = get_world_brief_articles()
+    brazil_brief_articles = get_brazil_brief_articles()
 
     return templates.TemplateResponse(
         request=request,
@@ -59,6 +64,8 @@ def dashboard(
             "categories": categories,
             "sources": sources,
             "counts": counts,
+            "world_brief_articles": world_brief_articles,
+            "brazil_brief_articles": brazil_brief_articles,
             "selected_category": category,
             "selected_source": source,
             "search_query": q,

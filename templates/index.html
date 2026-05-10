@@ -25,6 +25,22 @@
                     International headlines and geopolitical updates collected from multiple
                     trusted RSS sources.
                 </p>
+
+                {% if world_brief_articles %}
+                    <ul class="brief-list">
+                        {% for article in world_brief_articles %}
+                            <li>
+                                <a href="/articles/{{ article.id }}">
+                                    {{ article.title }}
+                                </a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="brief-empty">
+                        No international articles available yet.
+                    </p>
+                {% endif %}
             </article>
 
             <article class="brief-card main-brief">
@@ -47,6 +63,22 @@
                     Brazilian politics, economy, security, and public affairs collected from
                     national sources.
                 </p>
+
+                {% if brazil_brief_articles %}
+                    <ul class="brief-list">
+                        {% for article in brazil_brief_articles %}
+                            <li>
+                                <a href="/articles/{{ article.id }}">
+                                    {{ article.title }}
+                                </a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="brief-empty">
+                        No Brazilian articles available yet.
+                    </p>
+                {% endif %}
             </article>
         </section>
 

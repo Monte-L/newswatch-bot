@@ -90,6 +90,45 @@ body {
     line-height: 1.6;
 }
 
+.brief-list {
+    list-style: none;
+    padding: 0;
+    margin: 18px 0 0;
+    display: grid;
+    gap: 12px;
+}
+
+.brief-list li {
+    padding: 12px 0 0;
+    border-top: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+.brief-list a {
+    display: block;
+    color: #f1f5f9;
+    font-size: 14px;
+    font-weight: bold;
+    line-height: 1.35;
+    text-decoration: none;
+}
+
+.brief-list a:hover {
+    color: #67e8f9;
+}
+
+.brief-list span {
+    display: block;
+    margin-top: 5px;
+    color: #94a3b8;
+    font-size: 12px;
+}
+
+.brief-empty {
+    margin-top: 18px;
+    color: #94a3b8;
+    font-size: 14px;
+}
+
 .main-brief {
     border-color: rgba(103, 232, 249, 0.24);
     background:
